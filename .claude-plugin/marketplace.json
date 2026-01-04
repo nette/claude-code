@@ -7,6 +7,10 @@
 		{
 			"name": "nette",
 			"source": "./plugins/nette"
+		},
+		{
+			"name": "nette-dev",
+			"source": "./plugins/nette-dev"
 		}
 	]
 }

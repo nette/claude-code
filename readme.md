@@ -35,6 +35,20 @@ For developers building applications with Nette Framework. Includes automatic La
 | **latte-templates** | Latte templating system, layouts, filters, template classes |
 | **neon-format** | NEON data format syntax, mappings, sequences, entities |
 
+### `nette-dev`
+
+For contributors to the Nette Framework itself. Includes automatic PHP code style fixing. Installation:
+
+```
+/plugin install nette-dev@nette
+```
+
+| Skill | Description |
+|-------|-------------|
+| **php-coding-standards** | PHP formatting, naming conventions, code style |
+| **php-doc** | phpDoc documentation best practices |
+| **commit-messages** | Commit message conventions for Nette repositories |
+
 ## Usage
 
 Skills are automatically activated based on conversation context. For example:
