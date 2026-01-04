@@ -33,6 +33,8 @@ For contributors to the Nette Framework itself. Includes automatic PHP code styl
 | **php-doc** | phpDoc documentation best practices |
 | **commit-messages** | Commit message conventions for Nette repositories |
 
+**Setup:** Install nette/coding-standard globally with `/install-nette-cs`. After installation, PHP files are automatically fixed when edited.
+
 ## Installation
 
 Add the Nette marketplace:
