@@ -41,6 +41,11 @@ For contributors to the Nette Framework itself. Includes automatic PHP code styl
 
 ```
 /plugin install nette-dev@nette
+```
+
+Then install nette/coding-standard globally. After installation, PHP files are automatically fixed when edited.
+
+```
 /install-nette-cs
 ```
 
