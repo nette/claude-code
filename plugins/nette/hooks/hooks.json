@@ -1,5 +1,5 @@
 {
-  "description": "Validate Latte templates",
+  "description": "Validate Latte templates and NEON files",
   "hooks": {
     "PostToolUse": [
       {
@@ -8,6 +8,10 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/lint-latte.sh"
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/lint-neon.sh"
           }
         ]
       }
