@@ -12,23 +12,15 @@ Add the Nette marketplace:
 /plugin marketplace add nette/claude-code
 ```
 
-Install the plugin you need:
-
-```
-/plugin install nette@nette
-```
-
-or for framework contributors:
-
-```
-/plugin install nette-dev@nette
-```
-
 ## Available Plugins
 
 ### `nette`
 
 For developers building applications with Nette Framework. Includes automatic Latte template and NEON file validation.
+
+```
+/plugin install nette@nette
+```
 
 | Skill | Description |
 |-------|-------------|
@@ -47,13 +39,16 @@ For developers building applications with Nette Framework. Includes automatic La
 
 For contributors to the Nette Framework itself. Includes automatic PHP code style fixing.
 
+```
+/plugin install nette-dev@nette
+/install-nette-cs
+```
+
 | Skill | Description |
 |-------|-------------|
 | **php-coding-standards** | PHP formatting, naming conventions, code style |
 | **php-doc** | phpDoc documentation best practices |
 | **commit-messages** | Commit message conventions for Nette repositories |
-
-**Setup:** Install nette/coding-standard globally with `/install-nette-cs`. After installation, PHP files are automatically fixed when edited.
 
 ## Usage
 
