@@ -1,0 +1,12 @@
+{
+	"name": "nette",
+	"owner": {
+		"name": "Nette Foundation"
+	},
+	"plugins": [
+		{
+			"name": "nette",
+			"source": "./plugins/nette"
+		}
+	]
+}
