@@ -23,6 +23,16 @@ For developers building applications with Nette Framework. Includes automatic La
 | **latte-templates** | Latte templating system, layouts, filters, template classes |
 | **neon-format** | NEON data format syntax, mappings, sequences, entities |
 
+### `nette-dev`
+
+For contributors to the Nette Framework itself. Includes automatic PHP code style fixing.
+
+| Skill | Description |
+|-------|-------------|
+| **php-coding-standards** | PHP formatting, naming conventions, code style |
+| **php-doc** | phpDoc documentation best practices |
+| **commit-messages** | Commit message conventions for Nette repositories |
+
 ## Installation
 
 Add the Nette marketplace:
@@ -31,10 +41,16 @@ Add the Nette marketplace:
 /plugin marketplace add nette/claude-code
 ```
 
-Install the plugin:
+Install the plugin you need:
 
 ```
 /plugin install nette@nette
+```
+
+or for framework contributors:
+
+```
+/plugin install nette-dev@nette
 ```
 
 ## Usage
