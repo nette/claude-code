@@ -1,0 +1,16 @@
+{
+	"description": "Fix PHP coding standards",
+	"hooks": {
+		"PostToolUse": [
+			{
+				"matcher": "Edit|Write",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "${CLAUDE_PLUGIN_ROOT}/hooks/fix-php-style.sh"
+					}
+				]
+			}
+		]
+	}
+}

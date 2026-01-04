@@ -43,6 +43,12 @@ For contributors to the Nette Framework itself. Includes automatic PHP code styl
 /plugin install nette-dev@nette
 ```
 
+To enable automatic PHP code style fixing, install nette/coding-standard globally:
+
+```
+/install-nette-cs
+```
+
 | Skill | Description |
 |-------|-------------|
 | **php-coding-standards** | PHP formatting, naming conventions, code style |
