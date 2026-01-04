@@ -1,8 +1,28 @@
 # Nette Plugins for Claude Code
 
-Claude Code plugins providing coding conventions and best practices for the Nette Framework ecosystem.
+Plugins for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) – the AI-powered coding assistant by Anthropic. These plugins give Claude deep knowledge of the Nette Framework ecosystem, including best practices, coding conventions, and automatic file validation.
 
 <img width="1536" height="601" alt="image" src="https://github.com/user-attachments/assets/8b9443b6-9f37-418d-9212-3f4fd4356961" />
+
+## Installation
+
+Add the Nette marketplace:
+
+```
+/plugin marketplace add nette/claude-code
+```
+
+Install the plugin you need:
+
+```
+/plugin install nette@nette
+```
+
+or for framework contributors:
+
+```
+/plugin install nette-dev@nette
+```
 
 ## Available Plugins
 
@@ -34,26 +54,6 @@ For contributors to the Nette Framework itself. Includes automatic PHP code styl
 | **commit-messages** | Commit message conventions for Nette repositories |
 
 **Setup:** Install nette/coding-standard globally with `/install-nette-cs`. After installation, PHP files are automatically fixed when edited.
-
-## Installation
-
-Add the Nette marketplace:
-
-```
-/plugin marketplace add nette/claude-code
-```
-
-Install the plugin you need:
-
-```
-/plugin install nette@nette
-```
-
-or for framework contributors:
-
-```
-/plugin install nette-dev@nette
-```
 
 ## Usage
 
