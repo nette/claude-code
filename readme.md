@@ -22,6 +22,12 @@ For developers building applications with Nette Framework. Includes automatic La
 /plugin install nette@nette
 ```
 
+**Optional:** For AI-powered introspection of your DI container, database schema, and routing:
+
+```
+/install-mcp-inspector
+```
+
 | Skill | Description |
 |-------|-------------|
 | **nette-architecture** | Application architecture, presenters, modules, directory structure |

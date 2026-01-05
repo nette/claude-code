@@ -4,5 +4,6 @@
 	"description": "Conventions and best practices for Nette Framework, Latte templating engine, and NEON configuration format",
 	"author": {"name": "David Grudl"},
 	"keywords": ["php", "nette", "latte", "neon", "framework", "mvc", "templates", "forms", "database", "di"],
-	"skills": "./skills/"
+	"skills": "./skills/",
+	"commands": "./commands/"
 }

@@ -1,0 +1,6 @@
+{
+	"nette-inspector": {
+		"command": "php",
+		"args": ["vendor/bin/mcp-inspector"]
+	}
+}

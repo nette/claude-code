@@ -15,7 +15,8 @@ Each plugin contains:
 - `.claude-plugin/plugin.json` - Plugin metadata
 - `skills/` - Contextual documentation that activates based on conversation
 - `hooks/` - PostToolUse hooks for file validation/fixing
-- `commands/` - Slash commands (nette-dev only)
+- `commands/` - Slash commands
+- `.mcp.json` - MCP server configuration (nette plugin only)
 
 ## Testing Plugins Locally
 
@@ -44,6 +45,12 @@ description: When to activate this skill (used for contextual matching)
 ```
 
 Sub-files can be included in skill directories for complex topics.
+
+## MCP Server
+
+The `nette` plugin includes MCP server configuration (`.mcp.json`) that connects to `nette/mcp-inspector` package. Users install it via `/install-mcp-inspector` command which runs `composer require nette/mcp-inspector`.
+
+The MCP server provides tools for DI container, database schema, and router introspection. If `nette/mcp-inspector` is not installed, the MCP server silently fails and the plugin works without it.
 
 ## Publishing
 
