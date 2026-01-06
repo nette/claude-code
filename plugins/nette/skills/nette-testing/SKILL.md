@@ -79,10 +79,10 @@ testException('throws exception for invalid input', function () {
 composer tester
 
 # Run specific test file
-vendor/bin/tester tests/common/Engine.phpt -s -C
+vendor/bin/tester tests/common/Engine.phpt -s
 
 # Run tests in specific directory
-vendor/bin/tester tests/filters/ -s -C
+vendor/bin/tester tests/filters/ -s
 ```
 
 Static Analysis & Code Quality using PHPStan
