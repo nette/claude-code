@@ -1,6 +1,6 @@
 ---
 name: nette-configuration
-description: Provides Nette DI and services configuration guidelines. Use when configuring services.neon, common.neon, autowiring, or service definitions.
+description: Invoke before configuring Nette DI - services, .neon files, autowiring.
 ---
 
 ## Nette DI & Services Guidelines

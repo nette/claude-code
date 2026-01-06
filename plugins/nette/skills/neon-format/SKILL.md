@@ -1,6 +1,6 @@
 ---
 name: neon-format
-description: Provides NEON format syntax and conventions. Use when working with .neon files, Nette configuration, or NEON data structures.
+description: Invoke before creating or modifying .neon files. Provides NEON syntax and Nette configuration conventions.
 ---
 
 ## NEON Format

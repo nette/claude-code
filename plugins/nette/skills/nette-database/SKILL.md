@@ -1,6 +1,6 @@
 ---
 name: nette-database
-description: Provides Nette Database conventions and API reference. Use when working with database entities, Selection API, ActiveRow, SQL queries, or database configuration in Nette.
+description: Invoke before writing database queries or working with Selection API, ActiveRow in Nette.
 ---
 
 ## Database

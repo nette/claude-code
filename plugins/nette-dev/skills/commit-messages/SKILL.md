@@ -1,6 +1,6 @@
 ---
 name: commit-messages
-description: Provides commit message conventions for Nette repositories. Use when writing commit messages, committing changes, or reviewing commit history.
+description: Invoke BEFORE committing changes
 ---
 
 ## Commit Message Style

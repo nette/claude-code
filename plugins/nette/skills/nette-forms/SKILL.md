@@ -1,6 +1,6 @@
 ---
 name: nette-forms
-description: Provides Nette Forms conventions and patterns. Use when creating forms, form validation, form controls, rendering forms, or handling form submissions in presenters.
+description: Invoke before creating or modifying Nette Forms. Provides form controls, validation, rendering patterns.
 ---
 
 ## Nette Forms

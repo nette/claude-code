@@ -1,6 +1,6 @@
 ---
 name: php-doc
-description: Provides phpDoc documentation standards. Use when writing class, method, or property documentation in PHP.
+description: Invoke BEFORE writing phpDoc.
 ---
 
 ## Documentation (phpDoc)

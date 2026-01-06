@@ -1,6 +1,6 @@
 ---
 name: nette-testing
-description: Provides Nette Tester testing conventions. Use when writing tests, using Assert methods, or running tester commands.
+description: Invoke before writing or modifying any .phpt test files. Provides Nette Tester conventions, Assert methods, and tester commands.
 ---
 
 ## Testing with Nette Tester

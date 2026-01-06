@@ -1,6 +1,6 @@
 ---
 name: latte-templates
-description: Provides Latte templating syntax and conventions. Use when creating templates, working with Latte syntax, tags, filters, layouts, template classes, or Latte extensions.
+description: Invoke before creating or modifying .latte files. Provides Latte syntax, tags, filters, layouts, and extensions.
 ---
 
 ## Latte Templating System

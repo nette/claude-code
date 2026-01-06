@@ -1,6 +1,6 @@
 ---
 name: php-coding-standards
-description: Provides PHP coding standards for Nette projects. Use when formatting PHP code, naming conventions, or code style questions.
+description: Invoke BEFORE writing PHP code. Provides coding standards and naming conventions.
 ---
 
 ## PHP Coding Standards

@@ -1,6 +1,6 @@
 ---
 name: nette-architecture
-description: Provides Nette application architecture guidelines. Use when working with presenters, modules, directory structure, Core vs Model decisions, or Nette MVC patterns.
+description: Invoke before designing presenters, modules, or application structure in web applicartion.
 ---
 
 For new project skeleton, see [skeleton.md](skeleton.md).
