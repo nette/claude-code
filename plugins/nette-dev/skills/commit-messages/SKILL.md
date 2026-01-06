@@ -19,7 +19,7 @@ Follow these conventions for commit messages:
 - Feature additions: `added [feature]` (e.g., "added support for locale", "added |filter")
 - Bug fixes: `fixed [issue]` (e.g., "fixed escaping after {contentType xml}")
 - Improvements: `[subject]: [improvement]` (e.g., "Engine: refactoring", "Filters: is used as an instance")
-- Releases: `Released version X.Y.Z`
+- Releases: `Released version X.Y.Z` (use when bumping version and creating a tag)
 - Deprecations: `[method] deprecated`
 - Breaking changes: Include "(BC break)" in message
 - Work in progress: `wip` for temporary commits

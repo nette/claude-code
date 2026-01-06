@@ -49,6 +49,18 @@ public function example(
 }
 ```
 
+### Global Functions and Constants
+- Write global functions/constants without leading backslash: `count($arr)` not `\count($arr)`
+- For compiler-optimizable functions, add `use function` at the file beginning:
+  ```php
+  use Nette;
+  use function count, is_array, is_scalar, sprintf;
+  ```
+- Occasionally import constants that may help the compiler:
+  ```php
+  use const PHP_OS_FAMILY;
+  ```
+
 ### Other rules
 - Use try/catch for external operations
 - Prefer modern PHP syntax and concise expressions
