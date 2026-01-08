@@ -1,26 +1,34 @@
 # Nette Plugins for Claude Code
 
-Plugins for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) – the AI-powered coding assistant by Anthropic. These plugins give Claude deep knowledge of the Nette Framework ecosystem, including best practices, coding conventions, and automatic file validation.
+Plugins for [Claude Code](https://claude.com/product/claude-code) – the AI-powered coding assistant by Anthropic. These plugins give Claude deep knowledge of the Nette Framework ecosystem, including best practices, coding conventions, and automatic file validation.
 
 <img width="1536" height="601" alt="image" src="https://github.com/user-attachments/assets/8b9443b6-9f37-418d-9212-3f4fd4356961" />
 
 ## Installation
 
-Add the Nette marketplace:
+First, add the Nette marketplace to Claude Code (and enable auto-update):
 
 ```
 /plugin marketplace add nette/claude-code
 ```
 
-## Available Plugins
-
-### `nette`
-
-For developers building applications with Nette Framework. Includes automatic Latte template and NEON file validation. Installation:
+Then install the plugin:
 
 ```
 /plugin install nette@nette
 ```
+
+Optionally, Nette Framework contributors can also install:
+
+```
+/plugin install nette-dev@nette
+```
+
+## Plugins
+
+### `nette` – For Application Developers
+
+Best practices and conventions for building applications with Nette Framework. Includes automatic Latte template and NEON file validation.
 
 | Skill | Description |
 |-------|-------------|
@@ -35,25 +43,21 @@ For developers building applications with Nette Framework. Includes automatic La
 | **latte-templates** | Latte templating system, layouts, filters, template classes |
 | **neon-format** | NEON data format syntax, mappings, sequences, entities |
 
-### `nette-dev`
+### `nette-dev` – For Framework Contributors
 
-For contributors to the Nette Framework itself. Includes automatic PHP code style fixing. Installation:
-
-```
-/plugin install nette-dev@nette
-```
-
-To enable automatic PHP code style fixing, install nette/coding-standard globally:
-
-```
-/install-nette-cs
-```
+Coding standards for contributing to the Nette Framework itself. Includes automatic PHP code style fixing.
 
 | Skill | Description |
 |-------|-------------|
 | **php-coding-standards** | PHP formatting, naming conventions, code style |
 | **php-doc** | phpDoc documentation best practices |
 | **commit-messages** | Commit message conventions for Nette repositories |
+
+**Optional:** To enable automatic PHP code style fixing, install nette/coding-standard globally:
+
+```
+/install-nette-cs
+```
 
 ## Usage
 
