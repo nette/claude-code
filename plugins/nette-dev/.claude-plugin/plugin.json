@@ -1,6 +1,6 @@
 {
 	"name": "nette-dev",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Coding standards for Nette Framework contributors with automatic PHP style fixing",
 	"author": {"name": "David Grudl"},
 	"keywords": ["php", "nette", "coding-standards", "phpdoc", "contributor"],
