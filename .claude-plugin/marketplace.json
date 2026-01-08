@@ -1,16 +1,22 @@
 {
+	"$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
 	"name": "nette",
+	"description": "Official Claude Code plugins for Nette Framework ecosystem - conventions, best practices, and development tools for PHP developers",
 	"owner": {
 		"name": "Nette Foundation"
 	},
 	"plugins": [
 		{
 			"name": "nette",
-			"source": "./plugins/nette"
+			"source": "./plugins/nette",
+			"category": "development",
+			"homepage": "https://ai.nette.org/en/claude-code"
 		},
 		{
 			"name": "nette-dev",
-			"source": "./plugins/nette-dev"
+			"source": "./plugins/nette-dev",
+			"category": "development",
+			"homepage": "https://ai.nette.org/en/claude-code"
 		}
 	]
 }
