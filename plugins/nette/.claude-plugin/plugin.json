@@ -1,6 +1,6 @@
 {
 	"name": "nette",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Conventions and best practices for Nette Framework, Latte templating engine, and NEON configuration format",
 	"author": {"name": "David Grudl"},
 	"keywords": ["php", "nette", "latte", "neon", "framework", "mvc", "templates", "forms", "database", "di"],
