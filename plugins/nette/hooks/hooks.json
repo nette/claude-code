@@ -7,11 +7,11 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "${CLAUDE_PLUGIN_ROOT}/hooks/lint-latte.sh"
+						"command": "php ${CLAUDE_PLUGIN_ROOT}/hooks/lint-latte.php"
 					},
 					{
 						"type": "command",
-						"command": "${CLAUDE_PLUGIN_ROOT}/hooks/lint-neon.sh"
+						"command": "php ${CLAUDE_PLUGIN_ROOT}/hooks/lint-neon.php"
 					}
 				]
 			}
