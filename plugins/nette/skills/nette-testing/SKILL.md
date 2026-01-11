@@ -11,6 +11,21 @@ We use Nette Tester for unit testing. Test files should have `.phpt` extension.
 composer require nette/tester --dev
 ```
 
+### Bootstrap File
+
+The bootstrap file should set up the Tester environment and enable helper functions:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/../vendor/autoload.php';
+
+Tester\Environment::setup();
+Tester\Environment::setupFunctions();  // enables test(), testException(), testNoError()
+```
+
 ### Basic Test Structure
 
 ```php

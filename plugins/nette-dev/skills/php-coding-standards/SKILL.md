@@ -66,3 +66,5 @@ public function example(
 - Prefer modern PHP syntax and concise expressions
   - Example: Use `if (is_array($response['data'] ?? null))` instead of `if (isset($response['data']) && is_array($response['data']))`
 - Uses DOM API with HTML5 parser Lexbor
+- Use named arguments for boolean parameters whose meaning isn't obvious from context (e.g., `is_a($obj, $class, allow_string: true)`), but not when the method name makes it clear (e.g., `setReadonly(true)`)
+- Place interface/base class outside the namespace containing its implementations (e.g., `Foo\Network` next to `Foo\Networks\*`, not inside it)
