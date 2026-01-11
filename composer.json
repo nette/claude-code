@@ -1,0 +1,10 @@
+{
+	"name": "nette/claude-code",
+	"description": "Claude Code plugins for Nette Framework",
+	"require-dev": {
+		"nette/tester": "^2.5"
+	},
+	"scripts": {
+		"tester": "vendor/bin/tester tests -s"
+	}
+}
