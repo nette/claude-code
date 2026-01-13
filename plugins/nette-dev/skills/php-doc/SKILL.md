@@ -34,6 +34,7 @@ private array $name;
 - Prefer verbs like Returns, Formats, Checks, Creates, Converts, Sets
 
 #### Parameters and Return Values
+- Prefer `?Type` over `Type|null` for nullable types
 - Only document when adding information beyond PHP types
 - Add information about:
   - Array contents (e.g., `@return string[]`)
