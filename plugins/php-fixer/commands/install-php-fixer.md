@@ -1,5 +1,5 @@
 ---
-name: install-nette-cs
+name: install-php-fixer
 description: Install nette/coding-standard globally for PHP code style checking
 allowed-tools: Bash, Read, AskUserQuestion
 ---
@@ -73,7 +73,7 @@ Before installation, verify the environment:
 
    > Nette Coding Standard is now installed globally. The `ecs` tool is ready to use.
 
-2. **Integration with nette-dev plugin**
+2. **Integration with php-fixer plugin**
 
    The `fix-php-style` hook automatically fixes code style after you edit any `.php` file. No manual action needed.
 
@@ -117,7 +117,7 @@ Before installation, verify the environment:
 - Nette Coding Standard requires PHP 8.0+
 
 ### Hook doesn't run after editing PHP files
-1. Verify nette-dev plugin is installed in Claude Code
+1. Verify php-fixer plugin is installed in Claude Code
 2. Check that `ecs` is accessible (run `ecs --version`)
 3. Restart Claude Code session
 

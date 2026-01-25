@@ -24,6 +24,13 @@ Optionally, Nette Framework contributors can also install:
 /plugin install nette-dev@nette
 ```
 
+For automatic PHP code style fixing:
+
+```
+/plugin install php-fixer@nette
+/install-php-fixer
+```
+
 ## Plugins
 
 ### `nette` – For Application Developers
@@ -45,7 +52,7 @@ Best practices and conventions for building applications with Nette Framework. I
 
 ### `nette-dev` – For Framework Contributors
 
-Coding standards for contributing to the Nette Framework itself. Includes automatic PHP code style fixing.
+Coding standards and conventions for contributing to the Nette Framework itself.
 
 | Skill | Description |
 |-------|-------------|
@@ -53,11 +60,9 @@ Coding standards for contributing to the Nette Framework itself. Includes automa
 | **php-doc** | phpDoc documentation best practices |
 | **commit-messages** | Commit message conventions for Nette repositories |
 
-**Optional:** To enable automatic PHP code style fixing, install nette/coding-standard globally:
+### `php-fixer` – Automatic PHP Style Fixing
 
-```
-/install-nette-cs
-```
+Optional plugin that automatically fixes PHP code style after each edit using [nette/coding-standard](https://github.com/nette/coding-standard).
 
 ## Usage
 

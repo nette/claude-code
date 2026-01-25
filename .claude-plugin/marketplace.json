@@ -17,6 +17,12 @@
 			"source": "./plugins/nette-dev",
 			"category": "development",
 			"homepage": "https://ai.nette.org/en/claude-code"
+		},
+		{
+			"name": "php-fixer",
+			"source": "./plugins/php-fixer",
+			"category": "development",
+			"homepage": "https://ai.nette.org/en/claude-code"
 		}
 	]
 }

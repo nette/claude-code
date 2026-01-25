@@ -5,6 +5,7 @@
  * Silently skips if nette/coding-standard is not installed
  */
 
+
 function getComposerHomePath(): ?string
 {
 	if (PHP_OS_FAMILY === 'Windows') {
