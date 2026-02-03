@@ -48,6 +48,36 @@ private array $name;
   - Limitations or conditions
   - Unusual usage
 
+### Generic Array Types
+
+#### Key specification
+- `array<T>` = `array<int|string, T>` - any keys (omitting key means int|string)
+- `array<int, T>` - int keys only (not necessarily sequential)
+- `array<string, T>` - string keys only
+- `list<T>` - sequential int keys starting from 0 (0, 1, 2...)
+
+#### Difference between input and output
+- **@return**: `list<T>` is accurate if the function always returns a list
+- **@param**: `list<T>` can be too restrictive - may reject valid inputs
+
+#### When to use `list<T>` for input
+Analyze the implementation. Examples:
+- `foreach ($arr as $v)` - doesn't use keys ? `array<T>` is sufficient
+- `$arr[0]`, `$arr[1]` - accesses by index ? requires `list<T>`
+
+#### Conditional return types
+For return types dependent on parameters:
+```php
+/**
+ * @return ($flag is true ? list<array{string, int}> : list<string>)
+ */
+```
+
+#### How to determine the correct type
+1. Examine the implementation - how is the array used?
+2. Write a test script that outputs the result structure if needed.
+3. Outer key vs inner key in nested arrays - analyze each level separately
+
 ### Exception Documentation
 - Avoid phrases like "Exception that is thrown when"
 - Use natural language and active voice

@@ -11,6 +11,12 @@ Install globally using the `/install-nette-cs` command.
 
 After installation, PHP files are automatically checked when edited. Do not run `ecs` manually.
 
+### Editing Workflow with Auto-Fixer
+
+The auto-fixer removes unused `use` statements. When editing PHP files:
+- **Always add `use` statements in the same edit as the code that references them**, or add the code first and `use` statements after
+- Never add `use` statements alone in a separate edit — they will be removed as unused before the next edit adds the referencing code
+
 ### General Rules
 - Every PHP file must include `declare(strict_types=1)`
 - Use two empty lines between methods for better readability

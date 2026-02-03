@@ -1,6 +1,6 @@
 ---
 name: nette-architecture
-description: Invoke before designing presenters, modules, or application structure in web applicartion.
+description: Invoke before designing presenters, modules, or application structure in web application.
 ---
 
 For new project skeleton, see [skeleton.md](skeleton.md).

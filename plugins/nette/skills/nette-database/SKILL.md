@@ -142,8 +142,7 @@ public function getProductsInCategory(int $categoryId): Selection
 }
 ```
 
-**Benefits:** Reusable base queries, clear evolution of filtering logic, easy testing.
-**Benefits:** Full IDE support, type safety, clear contracts.
+**Benefits:** Reusable base queries, clear evolution of filtering logic, easy testing. Full IDE support, type safety, clear contracts.
 
 ### Relationship Navigation
 

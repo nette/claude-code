@@ -44,7 +44,7 @@ Best practices and conventions for building applications with Nette Framework. I
 | **nette-database** | Database conventions, entities, Selection API, queries |
 | **nette-forms** | Form controls, validation, rendering, create/edit patterns |
 | **nette-schema** | Data validation and normalization with Expect class |
-| **nette-testing** | Nette Tester usage, test structure, assertions |
+| **nette-tester** | Nette Tester usage, test structure, assertions |
 | **nette-utils** | Utility classes: Arrays, Strings, Image, Finder, DateTime, Json, Validators |
 | **frontend-development** | Vite, ESLint, Tailwind, Nette Assets integration |
 | **latte-templates** | Latte templating system, layouts, filters, template classes |
