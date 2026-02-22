@@ -38,9 +38,7 @@ project/
 ## Entry Point (www/index.php)
 
 ```php
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -53,9 +51,7 @@ $application->run();
 ## Bootstrap (app/Bootstrap.php)
 
 ```php
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App;
 
@@ -150,9 +146,7 @@ search:
 ## Router (app/Core/RouterFactory.php)
 
 ```php
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Core;
 
@@ -176,9 +170,7 @@ final class RouterFactory
 ## Presenter (app/Presentation/Home/HomePresenter.php)
 
 ```php
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Presentation\Home;
 
@@ -224,9 +216,7 @@ final class HomePresenter extends Nette\Application\UI\Presenter
 ## Test Bootstrap (tests/bootstrap.php)
 
 ```php
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 if (@!include __DIR__ . '/../vendor/autoload.php') {
 	echo 'Install Nette Tester using `composer install`';

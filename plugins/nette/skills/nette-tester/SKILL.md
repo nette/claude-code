@@ -16,9 +16,7 @@ composer require nette/tester --dev
 The bootstrap file should set up the Tester environment and enable helper functions:
 
 ```php
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -29,9 +27,7 @@ Tester\Environment::setupFunctions();  // enables test(), testException(), testN
 ### Basic Test Structure
 
 ```php
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 use Tester\Assert;
 use Nette\Assets\SomeClass;
