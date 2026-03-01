@@ -192,7 +192,7 @@ protected function createComponentProductForm(): Form
 | `addSubmit($name, $caption)` | Submit button |
 | `addButton($name, $caption)` | Button |
 
-For complete control reference, see [controls.md](controls.md).
+See [the complete control reference](references/controls.md) for all form controls.
 
 ### Basic Validation
 
@@ -218,7 +218,7 @@ $form->addPassword('password2')
 	->addRule($form::Equal, 'Passwords must match', $form['password']);
 ```
 
-For complete validation reference, see [validation.md](validation.md).
+See [the complete validation reference](references/validation.md) for all rules and conditions.
 
 ### Conditional Validation
 
@@ -265,7 +265,7 @@ $form->addEmail('email')
 {/form}
 ```
 
-For complete rendering reference, see [rendering.md](rendering.md).
+See [the complete rendering reference](references/rendering.md) for all rendering options.
 
 ### Form Events
 

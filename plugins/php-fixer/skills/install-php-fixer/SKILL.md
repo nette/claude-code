@@ -2,6 +2,7 @@
 name: install-php-fixer
 description: Install nette/coding-standard globally for PHP code style checking
 allowed-tools: Bash, Read, AskUserQuestion
+disable-model-invocation: true
 ---
 
 # Install Nette Coding Standard

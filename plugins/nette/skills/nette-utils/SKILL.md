@@ -12,10 +12,10 @@ composer require nette/utils
 ```
 
 For detailed references:
-- [arrays.md](arrays.md) - Arrays, ArrayHash, ArrayList
-- [strings.md](strings.md) - Strings and regex functions
-- [image.md](image.md) - Image manipulation
-- [finder.md](finder.md) - File searching
+- [Arrays, ArrayHash, ArrayList](references/arrays.md)
+- [Strings and regex functions](references/strings.md)
+- [Image manipulation](references/image.md)
+- [File searching with Finder](references/finder.md)
 
 ---
 

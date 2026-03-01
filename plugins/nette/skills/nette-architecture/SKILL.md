@@ -3,7 +3,7 @@ name: nette-architecture
 description: Invoke before designing presenters, modules, or application structure in web application.
 ---
 
-For new project skeleton, see [skeleton.md](skeleton.md).
+For new projects, see [the project skeleton reference](references/skeleton.md).
 
 ## Backend Architecture
 

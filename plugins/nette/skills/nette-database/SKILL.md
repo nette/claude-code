@@ -11,8 +11,8 @@ Uses Nette Database with MySQL 8.4+ as the backend.
 composer require nette/database
 ```
 
-For complete Explorer API, see [explorer.md](explorer.md).
-For SQL queries, see [sql-way.md](sql-way.md).
+See [the Explorer API reference](references/explorer.md) for the full ActiveRow/Selection API.
+See [the SQL query reference](references/sql-way.md) for direct SQL queries.
 
 ### Database Conventions
 

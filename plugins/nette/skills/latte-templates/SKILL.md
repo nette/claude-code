@@ -46,7 +46,7 @@ Filters modify output, written after `|`:
 
 Common filters: `upper`, `lower`, `capitalize`, `truncate`, `number`, `date`, `noescape`, `escapeUrl`, `stripHtml`, `trim`, `replace`, `first`, `last`, `length`, `sort`, `reverse`
 
-For complete filter reference, see [filters.md](filters.md).
+See [the complete filter reference](references/filters.md) for all available filters.
 
 ### n:attributes
 
@@ -203,7 +203,7 @@ Pair tags can be written as HTML attributes:
 | `{php code}` | Raw PHP (needs extension) |
 | `{dump $var}` | Debug dump (Tracy) |
 
-For complete tag reference, see [tags.md](tags.md).
+See [the complete tag reference](references/tags.md) for all available tags.
 
 ### Smart HTML Attributes
 

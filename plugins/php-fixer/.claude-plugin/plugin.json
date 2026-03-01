@@ -3,5 +3,5 @@
 	"version": "1.0.0",
 	"description": "Automatic PHP coding style fixer using nette/coding-standard",
 	"author": {"name": "David Grudl"},
-	"keywords": ["php", "coding-standards", "ecs", "fixer"]
+	"keywords": ["php", "coding-standards", "fixer"]
 }

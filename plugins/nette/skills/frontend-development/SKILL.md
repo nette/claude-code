@@ -7,8 +7,8 @@ description: Provides frontend development guidelines for Nette. Use when workin
 
 Frontend built with modern tooling and seamlessly integrated with Nette backend through Nette Assets.
 
-For complete Nette Assets reference, see [assets.md](assets.md).
-For Vite integration details, see [vite.md](vite.md).
+See [the Nette Assets reference](references/assets.md) for asset management.
+See [the Vite integration guide](references/vite.md) for build configuration.
 
 ### Technology Stack
 
