@@ -233,8 +233,8 @@ Transforms array according to path with operators `=`, `->`, `|`, `[]`.
 
 ```php
 $arr = [
-    ['name' => 'John', 'age' => 11],
-    ['name' => 'Mary', 'age' => null],
+	['name' => 'John', 'age' => 11],
+	['name' => 'Mary', 'age' => null],
 ];
 
 Arrays::associate($arr, 'name');
@@ -254,8 +254,8 @@ Invokes all callbacks and returns results.
 
 ```php
 $callbacks = [
-    '+' => fn($a, $b) => $a + $b,
-    '*' => fn($a, $b) => $a * $b,
+	'+' => fn($a, $b) => $a + $b,
+	'*' => fn($a, $b) => $a * $b,
 ];
 Arrays::invoke($callbacks, 5, 11); // ['+' => 16, '*' => 55]
 ```

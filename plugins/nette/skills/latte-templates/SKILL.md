@@ -1,6 +1,6 @@
 ---
 name: latte-templates
-description: Invoke before creating or modifying .latte files. Provides Latte syntax, tags, filters, layouts, and extensions.
+description: Invoke before creating or modifying .latte files, even for single-line changes. Provides Latte syntax, tags, filters, n:attributes, layouts, template inheritance, AJAX snippets, extensions, and Nette integration. Also trigger when user mentions Latte by name.
 ---
 
 ## Latte Templating System
@@ -31,6 +31,19 @@ composer require latte/latte
 {='hello'|upper}           {* expression with filter *}
 {$html|noescape}           {* disable escaping (use carefully!) *}
 ```
+
+Latte uses **context-aware escaping** — output adapts to where the variable is printed. In `<script>` context, arrays and objects are automatically serialized to JSON:
+
+```latte
+{* Arrays auto-serialize to JSON inside <script> *}
+<script type="application/ld+json">{$schemaData}</script>
+
+<script>
+	let config = {$config};
+</script>
+```
+
+Never use `json_encode()` in PHP + `|noescape` for this — Latte handles serialization and escaping safely on its own.
 
 ### Filters
 
@@ -200,7 +213,7 @@ Pair tags can be written as HTML attributes:
 | `{block name}...{/block}` | Define block |
 | `{layout 'file'}` | Extend layout |
 | `{do expression}` | Execute without output |
-| `{php code}` | Raw PHP (needs extension) |
+| `{php expression}` | Execute PHP expression |
 | `{dump $var}` | Debug dump (Tracy) |
 
 See [the complete tag reference](references/tags.md) for all available tags.
@@ -267,6 +280,28 @@ Admin/
 - `@layout.latte` - layout templates
 - `@form.latte` - reusable form structures
 - `@item.latte` - list item templates
+
+### Passing Variables to Templates
+
+The standard way is assigning to `$this->template`:
+
+```php
+$this->template->article = $this->articles->getById($id);
+```
+
+For properties that should always be available in templates, use the `#[TemplateVariable]` attribute (requires public or protected visibility) instead of repeating assignments in every action:
+
+```php
+use Nette\Application\Attributes\TemplateVariable;
+
+class ArticlePresenter extends Nette\Application\UI\Presenter
+{
+	#[TemplateVariable]
+	public string $siteName = 'My blog';
+}
+```
+
+The property value is automatically passed as `$siteName` in every template. If you explicitly assign `$this->template->siteName` in an action, the explicit value wins.
 
 ### Template Class Strategy
 
@@ -362,37 +397,26 @@ final class LatteExtension extends Latte\Extension
 
 ```neon
 latte:
+	strictParsing: yes
 	extensions:
 		- App\Presentation\Accessory\LatteExtension
 ```
 
-### Latte Configuration
-
-```neon
-latte:
-	strictParsing: yes
-	locale: cs
-```
+Enable `strictParsing` to catch template errors early (missing variables, typos in tag names).
 
 ### Anti-Patterns to Avoid
 
-- **Don't put business logic in templates** - templates display data, don't process it
-- **Don't create deep template hierarchies** - prefer composition over inheritance
-- **Don't duplicate template code** - extract to partials or components
+- **Don't put business logic in templates** – templates display data, they don't process it. Calculations, filtering, and data transformations belong in presenters or services. Complex template logic is a sign that the presenter's `render*` method isn't preparing data well enough.
+- **Don't create deep template hierarchies** – more than 2 levels of `{layout}` inheritance becomes hard to debug. Prefer `{include}` and `{define}` for composition over deep inheritance chains.
+- **Don't duplicate template code** – if the same HTML structure appears in multiple templates, extract it to a `{define}` block or a partial template (`@item.latte`). Duplication causes inconsistency when one copy gets updated but not the others.
 
----
+### Online Documentation
 
-## Online Documentation
+For detailed information, use WebFetch on these URLs:
 
-For detailed information beyond this reference, fetch from latte.nette.org:
-
-- [Syntax](https://latte.nette.org/en/syntax) - complete syntax guide with examples
-- [Tags](https://latte.nette.org/en/tags) - all available tags in detail
-- [Filters](https://latte.nette.org/en/filters) - all filters with usage examples
-- [Template Inheritance](https://latte.nette.org/en/template-inheritance) - layouts, blocks, embed
-- [Functions](https://latte.nette.org/en/functions) - built-in functions
-- [Extending Latte](https://latte.nette.org/en/extending-latte) - custom tags, filters, extensions
-- [Type System](https://latte.nette.org/en/type-system) - template types and IDE support
-- [Safety First](https://latte.nette.org/en/safety-first) - security and escaping
-
-When you need more details about a specific Latte feature not covered in this skill, use WebFetch to retrieve information from these URLs.
+- [Syntax](https://latte.nette.org/en/syntax) – complete syntax guide
+- [Tags](https://latte.nette.org/en/tags) – all available tags
+- [Filters](https://latte.nette.org/en/filters) – all filters with examples
+- [Template Inheritance](https://latte.nette.org/en/template-inheritance) – layouts, blocks, embed
+- [Extending Latte](https://latte.nette.org/en/extending-latte) – custom tags, filters, extensions
+- [Type System](https://latte.nette.org/en/type-system) – template types and IDE support

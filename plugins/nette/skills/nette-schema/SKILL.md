@@ -1,15 +1,24 @@
 ---
 name: nette-schema
-description: Provides Nette Schema for data validation and normalization. Use when validating configuration, API inputs, or any data structures with Expect class.
+description: Provides Nette Schema for data validation and normalization. Use when validating configuration, API inputs, or any data structures with Expect class. Covers Expect::structure(), Expect::from(), anyOf, arrayOf, listOf, assert, transform, castTo, otherItems, and Processor. This is about nette/schema – not Nette Forms validation (addRule), not Nette\Utils\Validators, and not JSON Schema.
 ---
 
 ## Nette Schema
 
-A library for validating and normalizing data structures against a defined schema.
+A library for validating and normalizing data structures against a defined schema. Declare what correct data looks like, and Schema verifies and transforms input in one step.
 
 ```shell
 composer require nette/schema
 ```
+
+### When to Use Schema
+
+- **Configuration validation** – validate config arrays loaded from .neon files
+- **API input validation** – validate request data before processing
+- **Data import/transform** – normalize external data into typed structures
+- **DI extension config** – validate extension configuration in `loadConfiguration()`
+
+Schema is complementary to Nette Forms (which handles user input with UI) and database constraints (which enforce storage-level rules). Use Schema for programmatic data validation where there's no form UI.
 
 ### Basic Usage
 
@@ -290,10 +299,8 @@ $createUserSchema = Expect::structure([
 ])->castTo('array');
 ```
 
----
+### Online Documentation
 
-## Online Documentation
+For detailed information, use WebFetch on these URLs:
 
-For detailed information, fetch from doc.nette.org:
-
-- [Nette Schema](https://doc.nette.org/en/schema) - complete guide
+- [Schema](https://doc.nette.org/en/schema) – complete Schema library guide with all Expect methods

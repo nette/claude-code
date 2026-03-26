@@ -16,7 +16,7 @@ $form->addPassword('password', 'Password:')
 	->addRule($form::MinLength, 'Password must be at least %d characters', 8);
 ```
 
-**Rules are checked only if the user fills in the control.**
+**Important:** Rules added via `addRule()` are checked only when the user fills in the control. An empty optional field passes all rules. Use `setRequired()` if the field must be filled.
 
 ## Universal Rules
 

@@ -190,16 +190,41 @@ Preload critical chunks:
 
 ## TypeScript
 
-Works out of the box:
+Vite handles TypeScript transpilation out of the box - no extra plugins needed. Just use `.ts` files as entry points:
 
 ```latte
 {asset 'main.ts'}
 ```
 
-Install for full support:
+Vite only transpiles TypeScript - it does not type-check. For type checking, install TypeScript and configure it for Vite:
 
 ```shell
 npm install -D typescript
+```
+
+The `tsconfig.json` must use `"moduleResolution": "bundler"` to work correctly with Vite:
+
+```json
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"noEmit": true
+	},
+	"include": ["assets"]
+}
+```
+
+Add a type-check script to `package.json`:
+
+```json
+{
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	}
+}
 ```
 
 ## Full Configuration
@@ -231,12 +256,9 @@ export default defineConfig({
 });
 ```
 
-## Important Notes
+## Important: Production Constraints
 
-**Production can only load:**
-1. Entry points defined in `entry`
-2. Files from `assets/public/`
+Be aware of these when deploying - they cause the most common "works in dev, broken in prod" issues:
 
-**Cannot load arbitrary files from `assets/`** - only files referenced by JS/CSS are compiled.
-
-**Files < 4KB are inlined** by default (Vite behavior).
+- **Production can only load** entry points defined in `entry` and files from `assets/public/`. You cannot load arbitrary files from `assets/` - only files referenced by JS/CSS imports are compiled.
+- **Files < 4KB are inlined** by default (Vite behavior) - they won't appear as separate files in the build output.

@@ -87,7 +87,6 @@ With attributes:
 ## Accessing Form Object
 
 ```latte
-{var $form = $form}
 <p>Form errors: {$form->getErrors()|implode:', '}</p>
 
 {foreach $form->getControls() as $control}
@@ -96,6 +95,8 @@ With attributes:
 	{/if}
 {/foreach}
 ```
+
+The `$form` variable is automatically available inside `{form}...{/form}` tags.
 
 ## Bootstrap 5 Integration
 

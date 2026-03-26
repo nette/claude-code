@@ -259,8 +259,8 @@ Strings::replace('hello, world!', '~\w+~', fn($m) => strrev($m[0]));
 
 // Multiple patterns
 Strings::replace('hello, world!', [
-    '~\w+~' => '--',
-    '~,\s+~' => ' ',
+	'~\w+~' => '--',
+	'~,\s+~' => ' ',
 ]);
 // '-- --!'
 
@@ -296,7 +296,7 @@ For large strings, use `lazy: true` to get a Generator instead of array:
 ```php
 $matches = Strings::matchAll($largeText, '~\w+~', lazy: true);
 foreach ($matches as $match) {
-    echo "Found: $match[0]\n";
-    // Can break early to save processing
+	echo "Found: $match[0]\n";
+	// Can break early to save processing
 }
 ```

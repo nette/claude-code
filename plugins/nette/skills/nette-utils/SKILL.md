@@ -1,6 +1,6 @@
 ---
 name: nette-utils
-description: Provides Nette Utils helper classes. Use when working with arrays, strings, files, images, JSON, validators, DateTime, or other utility functions.
+description: Provides Nette Utils helper classes. Use when working with Arrays, Strings, Image, Finder, FileSystem, Json, Validators, DateTime, Html element builder, Random, Callback, Type, or SmartObject from nette/utils. Do NOT use for Nette Schema, Nette Forms, Nette Database, Latte filters, or DI configuration.
 ---
 
 ## Nette Utils
@@ -129,7 +129,7 @@ FileSystem::write('/path/to/file', $content);
 
 // Read large files line by line
 foreach (FileSystem::readLines('/path/to/file') as $line) {
-    echo $line;
+	echo $line;
 }
 
 // Copy/Move/Delete
@@ -223,10 +223,10 @@ echo $el;  // <a href="https://nette.org">Nette</a>
 
 // Fluent interface
 $el = Html::el('div')
-    ->id('container')
-    ->class('main active')
-    ->data('id', 123)
-    ->setHtml('<p>Content</p>');
+	->id('container')
+	->class('main active')
+	->data('id', 123)
+	->setHtml('<p>Content</p>');
 
 // Shorthand
 Html::el('input', ['type' => 'text', 'name' => 'email']);
@@ -294,19 +294,19 @@ use Nette\SmartObject;
 
 class MyClass
 {
-    use SmartObject;
+	use SmartObject;
 
-    private string $name;
+	private string $name;
 
-    public function getName(): string
-    {
-        return $this->name;
-    }
+	public function getName(): string
+	{
+		return $this->name;
+	}
 
-    public function setName(string $name): void
-    {
-        $this->name = $name;
-    }
+	public function setName(string $name): void
+	{
+		$this->name = $name;
+	}
 }
 
 $obj = new MyClass;
@@ -314,18 +314,14 @@ $obj->name = 'John';    // calls setName()
 echo $obj->name;        // calls getName()
 ```
 
----
+### Online Documentation
 
-## Online Documentation
+For detailed information, use WebFetch on these URLs:
 
-For detailed information, fetch from doc.nette.org:
-
-- [Utils](https://doc.nette.org/en/utils/)
-- [Arrays](https://doc.nette.org/en/utils/arrays)
-- [Strings](https://doc.nette.org/en/utils/strings)
-- [DateTime](https://doc.nette.org/en/utils/datetime)
-- [FileSystem](https://doc.nette.org/en/utils/filesystem)
-- [Finder](https://doc.nette.org/en/utils/finder)
-- [Images](https://doc.nette.org/en/utils/images)
-- [JSON](https://doc.nette.org/en/utils/json)
-- [Validators](https://doc.nette.org/en/utils/validators)
+- [Arrays](https://doc.nette.org/en/utils/arrays) – array helpers
+- [Strings](https://doc.nette.org/en/utils/strings) – string functions and regex
+- [Images](https://doc.nette.org/en/utils/images) – image manipulation
+- [FileSystem](https://doc.nette.org/en/utils/filesystem) – file operations
+- [Finder](https://doc.nette.org/en/utils/finder) – file searching
+- [JSON](https://doc.nette.org/en/utils/json) – safe JSON handling
+- [Validators](https://doc.nette.org/en/utils/validators) – type checking and validation

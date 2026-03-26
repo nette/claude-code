@@ -13,17 +13,17 @@ use Nette\Utils\Finder;
 ```php
 // Find files with specific extensions
 foreach (Finder::findFiles(['*.txt', '*.md']) as $name => $file) {
-    echo $file; // FileInfo object
+	echo $file; // FileInfo object
 }
 
 // Find directories
 foreach (Finder::findDirectories('vendor') as $dir) {
-    echo $dir;
+	echo $dir;
 }
 
 // Find both files and directories
 foreach (Finder::find() as $item) {
-    echo $item;
+	echo $item;
 }
 ```
 
@@ -39,12 +39,12 @@ Finder::find();                  // everything
 
 // Instance methods for combining
 Finder::findDirectories('vendor')
-    ->files(['*.php', '*.phpt']); // directories + PHP files
+	->files(['*.php', '*.phpt']); // directories + PHP files
 
 // Or create instance first
 (new Finder)
-    ->directories()
-    ->files('*.php');
+	->directories()
+	->files('*.php');
 ```
 
 ---
@@ -54,24 +54,24 @@ Finder::findDirectories('vendor')
 ```php
 // in() - search only in directory (not recursive)
 Finder::findFiles('*.php')
-    ->in('src');
+	->in('src');
 
 // from() - search recursively
 Finder::findFiles('*.php')
-    ->from('src');
+	->from('src');
 
 // Current directory recursively
 Finder::findFiles('*.php')
-    ->from('.');
+	->from('.');
 
 // Multiple directories
 Finder::findFiles('*.php')
-    ->in(['src', 'tests'])
-    ->from('vendor');
+	->in(['src', 'tests'])
+	->from('vendor');
 
 // Absolute paths
 Finder::findFiles('*.php')
-    ->in('/var/www/html');
+	->in('/var/www/html');
 ```
 
 ---
@@ -99,7 +99,7 @@ Finder::findFiles('*.php')
 
 ```php
 Finder::findFiles('*.php')
-    ->from('src/**/tests'); // PHP files in any tests/ under src/
+	->from('src/**/tests'); // PHP files in any tests/ under src/
 ```
 
 ---
@@ -109,12 +109,12 @@ Finder::findFiles('*.php')
 ```php
 // Exclude files matching pattern
 Finder::findFiles('*.txt')
-    ->exclude('*X*');        // skip files with X in name
+	->exclude('*X*');        // skip files with X in name
 
 // Exclude directories from traversal
 Finder::findFiles('*.php')
-    ->from($dir)
-    ->exclude('temp', '.git');
+	->from($dir)
+	->exclude('temp', '.git');
 ```
 
 ---
@@ -125,16 +125,16 @@ Finder::findFiles('*.php')
 
 ```php
 Finder::findFiles('*.php')
-    ->size('>=', 100)    // at least 100 bytes
-    ->size('<=', 200);   // at most 200 bytes
+	->size('>=', 100)    // at least 100 bytes
+	->size('<=', 200);   // at most 200 bytes
 ```
 
 ### By Date
 
 ```php
 Finder::findFiles('*.php')
-    ->date('>', '-2 weeks')  // modified in last 2 weeks
-    ->from($dir);
+	->date('>', '-2 weeks')  // modified in last 2 weeks
+	->from($dir);
 ```
 
 Operators: `>`, `>=`, `<`, `<=`, `=`, `!=`, `<>`
@@ -143,7 +143,7 @@ Operators: `>`, `>=`, `<`, `<=`, `=`, `!=`, `<>`
 
 ```php
 Finder::findFiles('*.php')
-    ->filter(fn($file) => stripos($file->read(), 'Nette') !== false);
+	->filter(fn($file) => stripos($file->read(), 'Nette') !== false);
 ```
 
 ---
@@ -153,12 +153,12 @@ Finder::findFiles('*.php')
 ```php
 // Limit recursion depth
 Finder::findFiles('*.php')
-    ->from('.')
-    ->limitDepth(1);     // only first level subdirectories
+	->from('.')
+	->limitDepth(1);     // only first level subdirectories
 
 // Custom descent filter
 Finder::findFiles('*.php')
-    ->descentFilter(fn($file) => $file->getBasename() !== 'temp');
+	->descentFilter(fn($file) => $file->getBasename() !== 'temp');
 ```
 
 ---
@@ -189,17 +189,17 @@ $finder->childFirst();
 
 ```php
 ($finder = new Finder)
-    ->files('*.php')
-    ->from('src')
-    ->append()           // start new search
-    ->files('*.md')
-    ->from('docs')
-    ->append()
-    ->files('*.json');   // current directory
+	->files('*.php')
+	->from('src')
+	->append()           // start new search
+	->files('*.md')
+	->from('docs')
+	->append()
+	->files('*.json');   // current directory
 
 // Or append specific files
 $finder = Finder::findFiles('*.txt')
-    ->append(__FILE__);
+	->append(__FILE__);
 ```
 
 ---
@@ -210,15 +210,15 @@ Each result is a `Nette\Utils\FileInfo` object (extends `SplFileInfo`):
 
 ```php
 foreach (Finder::findFiles('*.jpg')->from('.') as $file) {
-    $file->getRealPath();         // absolute path
-    $file->getRelativePathname(); // relative to search root
-    $file->getBasename();         // filename
-    $file->getSize();             // size in bytes
-    $file->getMTime();            // modification timestamp
+	$file->getRealPath();         // absolute path
+	$file->getRelativePathname(); // relative to search root
+	$file->getBasename();         // filename
+	$file->getSize();             // size in bytes
+	$file->getMTime();            // modification timestamp
 
-    // Read/write content
-    $content = $file->read();
-    $file->write($newContent);
+	// Read/write content
+	$content = $file->read();
+	$file->write($newContent);
 }
 ```
 

@@ -1,6 +1,6 @@
 ---
 name: phpstan-analysis
-description: Invoke BEFORE running PHPStan or fixing PHPStan errors.
+description: Invoke BEFORE running PHPStan or fixing PHPStan errors. Covers error resolution strategy (refactoring > phpDoc > ignoring), common Nette error patterns, baseline management, and type tests. Use this whenever the user mentions PHPStan, static analysis, type errors, or wants to suppress warnings - even for a single error.
 ---
 
 ## PHPStan Analysis
@@ -18,11 +18,11 @@ vendor/bin/phpstan analyse src/foo/ src/bar.php
 vendor/bin/phpstan analyse --generate-baseline
 ```
 
-Never use `--error-format=json`. For machine-readable output, use `--error-format=raw`.
+Never use `--error-format=json` - its output format can change between PHPStan versions and is not designed for stable machine consumption. For machine-readable output, use `--error-format=raw`.
 
 ### Target Levels
 
-Minimum level for Nette libraries is **7**, target is **8**. Levels higher than 8 are not worth pursuing.
+Target level for Nette libraries is **8**. Levels higher than 8 are not worth pursuing - the additional strictness (e.g., `non-empty-string`, `positive-int`) catches very few real bugs relative to the annotation burden.
 
 - **Level 7**: Union types checked
 - **Level 8**: Null checks, strict types (our target)
@@ -45,31 +45,31 @@ Before making any changes, create a plan:
 
 1. **Group errors by type** (`property.nonObject`, `method.notFound`, `new.static`, etc.)
 2. **For each type, choose resolution** (in order of preference):
-   - **Refactoring** — does the error reveal a design issue?
-   - **Better type annotations** — code is correct but types need clarification via phpDoc
-   - **Ignoring** — false positive or not worth fixing (last resort)
+   - **Refactoring** - does the error reveal a design issue?
+   - **Better type annotations** - code is correct but types need clarification via phpDoc
+   - **Ignoring** - false positive or not worth fixing (last resort)
 3. **Justify each decision** with clear reasoning
 4. **Present the plan** before implementing
 
 ### General Principles
 
-1. **Prefer refactoring** — if an error reveals a design weakness, fix the design first
-2. **Then consider phpDoc** — if the code is correct but types are imprecise
-3. **Suppress only as last resort** — only for false positives or intentional design patterns
-4. **Never silence errors** — a fix must not hide potential problems
-5. **Never use `@phpstan-ignore` annotations** — no checker-specific things in code
-6. Use `assert()` sparingly, only when information cannot be expressed otherwise
-7. Systematic patterns ignore in `phpstan.neon` with a comment
+1. **Prefer refactoring** - if an error reveals a design weakness, fix the design first
+2. **Then consider phpDoc** - if the code is correct but types are imprecise
+3. **Suppress only as last resort** - only for false positives or intentional design patterns
+4. **Never silence errors** - a fix must not hide potential problems (see "Never Silence Errors" section below for examples)
+5. **Never use `@phpstan-ignore` annotations** - keep checker-specific directives out of source code
+6. Use `assert()` sparingly, only when type information cannot be expressed otherwise
+7. Systematic patterns: ignore in `phpstan.neon` with a comment explaining why
 8. Use baseline as last resort, minimize
 
 ### Refactoring as First Choice
 
 Always ask: **does this error reveal a real design issue?** Examples:
 
-- **Overly broad return types** — method returns `mixed` or `object` but always returns a specific type; narrow the return type
-- **Interface too loose** — code calls a method on implementation but not on interface; extend the interface
-- **Mixed responsibilities** — class handles too many types; split it
-- **Unnecessary dynamic access** — `__get`/`__set` where typed properties would work
+- **Overly broad return types** - method returns `mixed` or `object` but always returns a specific type; narrow the return type
+- **Interface too loose** - code calls a method on implementation but not on interface; extend the interface
+- **Mixed responsibilities** - class handles too many types; split it
+- **Unnecessary dynamic access** - `__get`/`__set` where typed properties would work
 
 The goal is not to "make PHPStan happy" but to use its feedback as a catalyst for better code.
 
@@ -107,13 +107,17 @@ $f = fopen($file, 'r') ?: throw new IOException("Cannot open file $file");
 
 ### Beware of `/** @var */` in Method Bodies
 
-`/** @var Type */` in method body is taken authoritatively by PHPStan — completely disables type checking for the variable. Use only when no better solution exists.
+`/** @var Type */` in method body is taken authoritatively by PHPStan - it completely disables type checking for that variable. Use only when no better solution exists.
 
 ---
 
-## phpDoc Compatibility with Native Types
+## phpDoc and Type Annotations
 
-phpDoc type must always match the native type:
+For phpDoc conventions (when to skip docs, array types, writing style), see the **php-doc** skill.
+
+Key rules specific to PHPStan compatibility:
+
+- phpDoc type must always match the native type:
 
 | Native Type | Wrong phpDoc | Correct phpDoc |
 |-------------|--------------|----------------|
@@ -121,31 +125,21 @@ phpDoc type must always match the native type:
 | `array\|null` | `int[]` | `int[]\|null` |
 | `object\|array` | `stdClass` | `stdClass\|array` |
 
-### Preferred Type Syntax
+- Don't use overly granular types (`positive-int`, `non-empty-string`, `non-empty-array`, `non-falsy-string`) - they rarely catch real bugs but add significant annotation maintenance burden
+- Use `class-string<T>`, `array<string, Foo>`, `list<int>`, `array{name: string, age: int}` - these are useful for PHPStan and worth maintaining
 
-- Prefer `?Type` over `Type|null`
-- Single-line `/** ... */` for simple annotations
-
-**Use (useful generic types):**
-- `class-string<T>`, `array<string, Foo>`, `list<int>`, `array{name: string, age: int}`, `object{foo: string}`
-
-**Don't use (obsessive types):**
-- `positive-int`, `non-empty-string`, `non-empty-array`, `non-falsy-string`
-
-Exception: use only when it provides clear benefit.
-
-**Array notation:**
-- `foo[]` — always prefer for simple type (shortest notation)
-- `array<foo|bar>` — for union types (more readable than `(foo|bar)[]`)
-- `array<string, foo>` or `list<foo>` — when keys are not generic
+**Array notation preference:**
+- `foo[]` - always prefer for simple types (shortest notation)
+- `array<foo|bar>` - for union types (more readable than `(foo|bar)[]`)
+- `array<string, foo>` or `list<foo>` - when keys are not generic
 
 ---
 
 ## Common Nette Error Patterns
 
-### `property.nonObject` — property access on `array|object`
+### `property.nonObject` - property access on `array|object`
 
-In DI Extensions, `$this->config` returns `array|object` but is `stdClass`. Add phpDoc:
+In DI Extensions, `$this->config` returns `array|object` but is `stdClass`. This is one of the legitimate cases for `/** @var */` in method body - the type cannot be expressed otherwise:
 
 ```php
 public function loadConfiguration(): void
@@ -167,23 +161,23 @@ $component->saveState($params);
 
 ### `property.uninitializedReadonly` / `property.readOnlyAssignNotInConstructor`
 
-Readonly properties initialized via inject methods (Nette DI pattern). Ignore — intentional.
+Readonly properties initialized via inject methods (Nette DI pattern). Ignore - this is an intentional framework pattern.
 
-### `new.static` — unsafe usage of `new static()`
+### `new.static` - unsafe usage of `new static()`
 
-If intentional design pattern (derive/factory methods), ignore in phpstan.neon. Or change to `new self`.
+If intentional design pattern (derive/factory methods), ignore in phpstan.neon. Or change to `new self` if subclassing isn't expected.
 
 ### `closure.unusedUse`
 
-Variable in `use ($var)` used in `require`'d file. Ignore — false positive.
+Variable in `use ($var)` used in `require`'d file. Ignore - false positive.
 
 ### `function.alreadyNarrowedType`
 
-PHPStan knows the type is already narrowed. Remove unnecessary condition, or ignore if runtime validation.
+PHPStan knows the type is already narrowed. Remove unnecessary condition, or ignore if it serves as runtime validation.
 
 ### `catch.neverThrown`
 
-Verify if catch is actually needed, if so, ignore.
+Verify if the catch is actually needed. If so, ignore.
 
 ---
 
@@ -191,9 +185,9 @@ Verify if catch is actually needed, if so, ignore.
 
 ### Priority
 
-1. **Fix** — always prefer
-2. **phpstan.neon** — for systematic/intentional patterns with a comment
-3. **phpstan-baseline.neon** — last resort, minimize
+1. **Fix** - always prefer
+2. **phpstan.neon** - for systematic/intentional patterns, always with a comment
+3. **phpstan-baseline.neon** - last resort, minimize
 
 ### Systematic Patterns in phpstan.neon
 
@@ -227,7 +221,7 @@ Use only for false positives that are not systematic, or individual cases where 
 
 ```neon
 parameters:
-	level: 8  # or 7
+	level: 8
 
 	paths:
 		- src
@@ -281,7 +275,7 @@ assertType('string', Normalizer::normalize('foo'));
 ## Workflow
 
 1. **Run PHPStan** and get list of errors
-2. **Understand the project** — relationships between classes are essential
+2. **Understand the project** - relationships between classes are essential
 3. **Exclude** files for historical compatibility
 4. **Create a plan** grouping errors by type with justification for each strategy
 5. **Refactor code** where error reveals a design improvement

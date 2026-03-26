@@ -1,11 +1,11 @@
 ---
 name: nette-database
-description: Invoke before writing database queries or working with Selection API, ActiveRow in Nette.
+description: Invoke before writing database queries or working with Selection API, ActiveRow in Nette. Use when creating entity classes, configuring database connections, writing queries, fetching data, using joins, or designing Row classes. Also consult when deciding between Selection API and raw SQL, or setting up database configuration in .neon files.
 ---
 
 ## Database
 
-Uses Nette Database with MySQL 8.4+ as the backend.
+Uses Nette Database, typically with MySQL, PostgreSQL or SQLite as the backend.
 
 ```shell
 composer require nette/database
@@ -19,9 +19,7 @@ See [the SQL query reference](references/sql-way.md) for direct SQL queries.
 - Table names use **singular form** (e.g., `user` not `users`)
 - Use TINYINT(1) for booleans
 - Use `id` for primary keys
-- Character encoding should be:
-  - `utf8mb4_cs_0900_ai_ci` for Czech-language applications
-  - `utf8mb4_0900_ai_ci` for English-language applications
+- Character encoding: `utf8mb4` with appropriate collation (e.g. `utf8mb4_0900_ai_ci`, or `utf8mb4_cs_0900_ai_ci` for Czech)
 - Standard timestamp fields:
   - `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
   - never use TIMESTAMP for date/time fields
@@ -42,7 +40,7 @@ All entities in `App\Entity` with consistent `Row` suffix:
 - `order_item` table → `OrderItemRow`
 - `variant_expiration` table → `VariantExpirationRow`
 
-**Why flat:** Entities are data structures that cross domain boundaries. ProductRow used in catalog, orders, inventory, and reporting contexts.
+**Why flat:** Entities are data structures that cross domain boundaries. A `ProductRow` might be used in catalog, orders, inventory, and reporting contexts. Subdividing entities by domain forces you to either pick one arbitrary "home" domain or duplicate references.
 
 #### Entity Organization
 
@@ -58,6 +56,8 @@ app/Entity/
 #### Entity Documentation Patterns
 
 ```php
+use Nette\Database\Table;
+
 /**
  * @property-read int $id
  * @property-read string $title
@@ -117,9 +117,7 @@ return $this->db->query('
 
 ### Query Building Patterns
 
-**Progressive refinement** - start with base methods, refine with conditions:
-
-**Always use generic types** for Selection returns:
+Build queries by progressive refinement – start with a base method, then add conditions. Always use generic types for Selection returns:
 
 ```php
 /** @return Selection<ProductRow> */
@@ -164,34 +162,55 @@ public function getProductsInCategory(int $categoryId): Selection
 **Single optional result:** `->fetch()`
 **All results as array:** `->fetchAll()`
 **Key-value pairs:** `->fetchPairs('key_column', 'value_column')`
-**Structured data:** `->fetchAssoc('key_column->')`
+**Single scalar value:** `->fetchField()` (first column of first row)
 **Count only:** `->count('*')`
 
-### Schema Management
+**Structured data with fetchAssoc:**
 
-**Use direct SQL migrations** rather than ORM-style migrations:
-- Store schema in `sql/db.sql`
-- Manual migration scripts for schema changes
-- Version control captures schema evolution
+```php
+// Key by column value
+$byId = $db->table('product')->fetchAssoc('id');
+// [1 => ProductRow, 2 => ProductRow, ...]
 
-### Database Constraints
+// Group by column
+$byCategory = $db->table('product')->fetchAssoc('category_id[]');
+// [5 => [ProductRow, ProductRow], 8 => [ProductRow, ...]]
 
-**Rely on database constraints** for data integrity:
-- Foreign key constraints for relationships
-- Unique constraints for business rules
-- Check constraints for data validation
+// Nested grouping
+$nested = $db->table('product')->fetchAssoc('category_id|active');
+// [5 => [true => ProductRow, false => ProductRow], ...]
+```
 
-**Handle constraint violations** in services with meaningful business exceptions.
+The path string uses `[]` for array grouping, `|` for nested keys, and `=` to extract a single value.
+
+### Schema and Constraints
+
+**Use direct SQL migrations** rather than ORM-style migrations – store schema in `sql/db.sql` with manual migration scripts. Rely on database constraints (foreign keys, unique, check) for data integrity and handle constraint violations in services with meaningful business exceptions.
+
+### Transactions
+
+Wrap multi-step writes in transactions to ensure consistency:
+
+```php
+$this->db->transaction(function () use ($data, $items) {
+	$order = $this->db->table('order')->insert($data);
+	foreach ($items as $item) {
+		$order->related('order_item')->insert($item);
+	}
+});
+```
+
+The callback approach automatically commits on success and rolls back on exception.
 
 ### Anti-Patterns to Avoid
 
-**Don't create separate Repository classes** - combine data access with business logic in services.
-**Don't use ActiveRecord for complex queries** - raw SQL is cleaner for analytics and reporting.
-**Don't fetch more data than needed** - use appropriate fetching methods and SELECT only required columns for large datasets.
+**Don't create separate Repository classes** – in Nette, services combine data access with business logic. A separate repository layer adds indirection without benefit because Nette Database Explorer already provides a clean query API. The service IS the repository.
 
-### Error Handling Strategy
+**Don't use Selection API for complex queries** – raw SQL is cleaner for analytics, reporting, and recursive queries. Selection API excels at CRUD and simple filtering; forcing complex JOINs through it creates hard-to-read code.
 
-### Service Level Error Handling
+**Don't fetch more data than needed** – use appropriate fetching methods (`fetchPairs` for dropdowns, `count('*')` for pagination) and SELECT only required columns for large datasets.
+
+### Error Handling
 
 **Transform database errors to business exceptions:**
 
@@ -203,7 +222,7 @@ try {
 }
 ```
 
-**Handle at service boundary** - presenters should receive business exceptions, not database exceptions.
+**Handle at service boundary** – presenters should receive business exceptions, not database exceptions. This keeps the UI layer independent of the storage layer and produces meaningful error messages.
 
 ### Database Configuration
 
@@ -242,12 +261,10 @@ services:
 	- LogService(@database.logs.connection)
 ```
 
----
+### Online Documentation
 
-## Online Documentation
+For detailed information, use WebFetch on these URLs:
 
-For detailed information, fetch from doc.nette.org:
-
-- [Database Core](https://doc.nette.org/en/database/core) - SQL queries
-- [Database Explorer](https://doc.nette.org/en/database/explorer) - ORM-like API
-- [Configuration](https://doc.nette.org/en/database/configuration) - connection setup
+- [Database Core](https://doc.nette.org/en/database/core) – SQL queries and Connection API
+- [Database Explorer](https://doc.nette.org/en/database/explorer) – Selection/ActiveRow API
+- [Database Configuration](https://doc.nette.org/en/database/configuration) – connection setup

@@ -1,6 +1,6 @@
 ---
 name: neon-format
-description: Invoke before creating or modifying .neon files. Provides NEON syntax and Nette configuration conventions.
+description: Invoke before creating or modifying .neon files. Provides NEON syntax and Nette configuration conventions. Use when writing or editing .neon config files, asking about NEON syntax (entities, multiline strings, inline notation, special values, escaping), converting YAML to NEON, parsing or encoding NEON in PHP (Neon::decode, Neon::encode), running neon-lint, or debugging NEON syntax errors. For phpstan.neon, use the phpstan-analysis skill (from nette-dev plugin) instead. Do not trigger for Nette DI concepts like autowiring and service registration without .neon file context.
 ---
 
 ## NEON Format
@@ -146,10 +146,25 @@ Column(
 street: 742 Evergreen Terrace  # inline comment
 ```
 
+### Block vs Inline Notation
+
+Use **inline** for short, simple values (up to ~3 items):
+```neon
+extensions: [foo, bar]
+roles: {admin: true, user: false}
+```
+
+Use **block** for anything complex, nested, or long:
+```neon
+services:
+	- App\Model\UserService
+	- App\Model\OrderService
+```
+
 ### Key Rules
 
-- Space after `:` is required
-- Use tabs for indentation
+- Space after `:` is required (`key: value`, not `key:value`)
+- Use **tabs** for indentation (not spaces – unlike YAML)
 - Block notation cannot be nested inside inline notation
 - Unquoted strings cannot start/end with spaces or look like numbers/booleans/dates
 
@@ -193,3 +208,9 @@ Check syntax errors in `.neon` files:
 ```shell
 vendor/bin/neon-lint <path>
 ```
+
+### Online Documentation
+
+For detailed information, use WebFetch on these URLs:
+
+- [NEON Format](https://ne-on.org) – complete NEON specification and examples

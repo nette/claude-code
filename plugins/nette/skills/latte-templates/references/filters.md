@@ -73,6 +73,7 @@
 | `random` | Random element | `{$arr\|random}` |
 | `length` | Count elements | `{$arr\|length}` |
 | `slice:start:length` | Extract slice | `{$arr\|slice:0:5}` |
+| `limit:length` | Limit array/string/iterator | `{$arr\|limit:5}` |
 | `sort` | Sort array | `{$arr\|sort}` |
 | `sort:by:key` | Sort by key | `{$arr\|sort: by: name}` |
 | `reverse` | Reverse order | `{$arr\|reverse}` |

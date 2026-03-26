@@ -1,6 +1,6 @@
 ---
 name: frontend-development
-description: Provides frontend development guidelines for Nette. Use when working with Vite, SCSS, JavaScript, Nette Assets, or build configuration.
+description: Provides frontend development guidelines for Nette. Use when working with Vite, SCSS, JavaScript/TypeScript, Nette Assets ({asset} tag, asset mapping), ESLint with @nette/eslint-plugin, Naja AJAX library, frontend entry points, npm packages in Nette context, Tailwind CSS with Latte templates, nette-forms npm package, HMR, build commands (npm run dev/build), or passing data from PHP to JavaScript.
 ---
 
 ## Frontend Development
@@ -60,8 +60,8 @@ assets/js/
 │   ├── blog.css            ← Page-specific enhancements
 │   └── checkout.css        ← Multi-step checkout flow
 └── utils/
-	├── ajax.js            ← AJAX utilities
-	└── validation.js      ← Form validation helpers
+    ├── ajax.js            ← AJAX utilities
+    └── validation.js      ← Form validation helpers
 ```
 
 ### Nette Assets Integration Patterns
@@ -90,13 +90,15 @@ assets:
 <script>
 window.appConfig = {
 	apiUrl: {$baseUrl . '/api'},
-	userId: {$user->isLoggedIn() ? $user->getId() : 'null'},
+	userId: {$user->isLoggedIn() ? $user->getId() : null},
 	locale: {$locale},
 	csrfToken: {$csrfToken}
 };
 </script>
 {asset 'front.js'}
 ```
+
+Latte automatically applies context-sensitive escaping – values inside `<script>` are JSON-encoded, so strings get quoted and `null` stays `null`.
 
 ```javascript
 // In JavaScript component
@@ -106,6 +108,23 @@ fetch(`${apiUrl}/user-data`, {
 	headers: { 'X-CSRF-Token': csrfToken }
 });
 ```
+
+### Naja (AJAX Library)
+
+Naja is the standard AJAX library for Nette – it handles snippet redrawing, form submissions, and history integration:
+
+```shell
+npm install naja
+```
+
+```javascript
+import naja from 'naja';
+
+// Initialize after DOM is ready
+naja.initialize();
+```
+
+Naja automatically intercepts links and forms with the `ajax` CSS class and handles snippet updates from the server. See [Naja documentation](https://naja.js.org/) for configuration and extensions.
 
 ### Nette Forms Integration
 
@@ -225,11 +244,9 @@ npm run lint
 npm run lint:fix
 ```
 
----
+### Online Documentation
 
-## Online Documentation
+For detailed information, use WebFetch on these URLs:
 
-For detailed information:
-
-- [Nette Assets](https://doc.nette.org/en/assets) - asset management
-- [Vite Integration](https://doc.nette.org/en/assets/vite) - Vite setup
+- [Assets](https://doc.nette.org/en/assets) – Nette Assets documentation
+- [Naja](https://naja.js.org/) – AJAX library for Nette

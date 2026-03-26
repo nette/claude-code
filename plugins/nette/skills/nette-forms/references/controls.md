@@ -210,8 +210,10 @@ Hidden input.
 
 ```php
 $form->addHidden('id', $id);
-$form->addHidden('token', $this->csrfToken);
+$form->addHidden('returnUrl', $this->getParameter('returnUrl'));
 ```
+
+Note: CSRF protection is automatic in Nette Forms — no need to add a hidden CSRF token manually.
 
 ### addContainer(string $name): Container
 
@@ -254,11 +256,11 @@ private function formSucceeded(Form $form, \stdClass $data): void
 
 ### addButton(string $name, $caption): Button
 
-Regular button (for JavaScript).
+Regular button (no submit, handled via JavaScript event listeners).
 
 ```php
 $form->addButton('preview', 'Preview')
-	->setHtmlAttribute('onclick', 'previewForm()');
+	->setHtmlAttribute('data-action', 'preview');
 ```
 
 ### addImageButton(string $name, string $src = null, string $alt = null): ImageButton

@@ -13,28 +13,23 @@ Install the `nette/coding-standard` package globally to enable automatic PHP cod
 
 ## Step 0: Pre-flight Checks
 
-Before installation, verify the environment:
+1. **Check PHP availability** (requires PHP 8.0+)
+   ```bash
+   php --version
+   ```
+   - If fails or version < 8.0: Stop and inform user.
 
-1. **Check Composer availability**
+2. **Check Composer availability**
    ```bash
    composer --version
    ```
    - If fails: Stop and inform user to install Composer from https://getcomposer.org/
 
-2. **Detect existing installation**
+3. **Detect existing installation**
    ```bash
    composer global show nette/coding-standard 2>/dev/null
    ```
-   - If already installed: Inform user and ask if they want to update
-   - Same command works for update: `composer global require nette/coding-standard`
-
-### Interpretation Table
-
-| Composer | Already installed | Action |
-|----------|-------------------|--------|
-| Not available | - | Stop: "Install Composer first" |
-| Available | No | Proceed to Step 1 |
-| Available | Yes | Ask: Update or skip? (same install command updates to latest) |
+   - If already installed: Inform user and ask if they want to update (same install command updates to latest).
 
 ---
 
@@ -50,39 +45,27 @@ Before installation, verify the environment:
    composer global require nette/coding-standard
    ```
 
-3. **Verify success**
-   - Check exit code of composer command
-   - If failed: Go to Troubleshooting
-
 ---
 
 ## Step 2: Verification
 
-1. **Test that ecs binary exists**
-   ```bash
-   composer global config home
-   ```
-   - Check that `{composer-home}/vendor/bin/ecs` exists
+Run `ecs` from the Composer global bin directory to verify it works:
 
-   The `fix-php-style` hook finds `ecs` automatically in the Composer home directory - **PATH configuration is not needed** for the hook to work.
+```bash
+# Unix
+$(composer global config home)/vendor/bin/ecs --version
 
----
+# Windows
+php "$(composer global config home)/vendor/bin/ecs" --version
+```
 
-## Step 3: Post-installation
+The `fix-php-style` hook finds `ecs` automatically in the Composer home directory – **PATH configuration is not needed**.
 
-1. **Confirm successful installation**
-
-   > Nette Coding Standard is now installed globally. The `ecs` tool is ready to use.
-
-2. **Integration with php-fixer plugin**
-
-   The `fix-php-style` hook automatically fixes code style after you edit any `.php` file. No manual action needed.
-
-   Custom configuration is possible via `ncs.xml` (CodeSniffer rules) or `ncs.php` (PHP-CS-Fixer rules) in project root.
+If verification succeeds, confirm to the user that Nette Coding Standard is installed and the `fix-php-style` hook will automatically fix code style after editing PHP files.
 
 ---
 
-## Step 4: GitHub Star (Optional)
+## Step 3: GitHub Star (Optional)
 
 1. **Check if `gh` CLI is available**
    ```bash
@@ -104,28 +87,6 @@ Before installation, verify the environment:
 
 ## Troubleshooting
 
-### "composer: command not found"
-- Composer is not installed or not in PATH
-- Install from https://getcomposer.org/
-
 ### Permission denied during installation
-- **Unix:** Try without sudo first. If needed: `sudo composer global require nette/coding-standard`
+- **Unix:** Fix ownership of Composer home: `sudo chown -R $(whoami) "$(composer global config home)"`
 - **Windows:** Run terminal as Administrator
-
-### PHP version conflict
-- Check required PHP version: `composer global show nette/coding-standard`
-- Verify your PHP version: `php --version`
-- Nette Coding Standard requires PHP 8.0+
-
-### Hook doesn't run after editing PHP files
-1. Verify php-fixer plugin is installed in Claude Code
-2. Check that `ecs` is accessible (run `ecs --version`)
-3. Restart Claude Code session
-
-### Preset not found error
-- Check available presets match your PHP version
-- Explicitly specify preset: `ecs check src --preset php81`
-
-### "Could not find composer.json" warning
-- Run `ecs` from your project root directory
-- Or specify paths explicitly: `ecs check /path/to/src`

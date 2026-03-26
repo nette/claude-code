@@ -1,6 +1,6 @@
 ---
 name: nette-forms
-description: Invoke before creating or modifying Nette Forms. Provides form controls, validation, rendering patterns.
+description: Invoke before creating or modifying Nette Forms. Provides form controls, validation, rendering patterns. Use when working with form factories, form controls, validation rules, form events, rendering forms in Latte, Bootstrap integration, form containers, or form error handling. Also trigger for $form/$data in Nette context.
 ---
 
 ## Nette Forms
@@ -60,11 +60,13 @@ class ProductPresenter extends BasePresenter
 		private ProductFacade $facade,
 	) {}
 
-	public function renderEdit(int $id = null): void
+	public function actionEdit(int $id = null): void
 	{
-		$this->template->product = $id
-			? $this->facade->getProduct($id)
-			: null;
+		if ($id) {
+			$product = $this->facade->getProduct($id);
+			$this->template->product = $product;
+			$this['productForm']->setDefaults($product->toArray());
+		}
 	}
 
 	protected function createComponentProductForm(): Form
@@ -96,37 +98,42 @@ class ProductPresenter extends BasePresenter
 }
 ```
 
-Template with edit check:
+Template:
 
 ```latte
 {block content}
 <h1>{if $product}Edit: {$product->name}{else}New Product{/if}</h1>
 
 {form productForm}
-	{if $product}
-		{$form['name']->setDefaultValue($product->name)}
-		{$form['description']->setDefaultValue($product->description)}
-		{$form['price']->setDefaultValue($product->price)}
-	{/if}
 	<table>
-		<tr>
-			<td>{label name}{input name}</td>
-		</tr>
-		<tr>
-			<td>{label description}{input description}</td>
-		</tr>
-		<tr>
-			<td>{label price}{input price}</td>
-		</tr>
+		<tr><td>{label name}{input name}</td></tr>
+		<tr><td>{label description}{input description}</td></tr>
+		<tr><td>{label price}{input price}</td></tr>
 	</table>
 	{input send}
 {/form}
 {/block}
 ```
 
+Defaults are set in `actionEdit()` via `$form->setDefaults()` – never set defaults in the template.
+
 ### Form Reuse with Factory
 
-For forms used in multiple places, create a factory:
+A common base `FormFactory` creates `Form` instances with shared configuration (CSRF, renderer, translation). Changing it in one place affects all forms in the application – no need to hunt through individual presenters:
+
+```php
+final class FormFactory
+{
+	public function create(): Form
+	{
+		$form = new Form;
+		// Shared setup for all forms: renderer, translator, default classes, etc.
+		return $form;
+	}
+}
+```
+
+For specific forms used in multiple places, create a dedicated factory:
 
 ```php
 final class ProductFormFactory
@@ -188,6 +195,8 @@ protected function createComponentProductForm(): Form
 | `addUpload($name, $label)` | File upload |
 | `addMultiUpload($name, $label)` | Multiple files |
 | `addDate($name, $label)` | Date picker |
+| `addTime($name, $label)` | Time picker |
+| `addDateTime($name, $label)` | Combined date+time picker |
 | `addHidden($name)` | Hidden field |
 | `addSubmit($name, $caption)` | Submit button |
 | `addButton($name, $caption)` | Button |
@@ -311,18 +320,17 @@ private function productFormSucceeded(Form $form, \stdClass $data): void
 
 ### Anti-Patterns to Avoid
 
-- **Don't put business logic in form handlers** - use services/facades
-- **Don't create forms in action methods** - use createComponent* factory
-- **Don't validate twice** - use form validation, not manual checking
-- **Don't skip setRequired()** - always validate required fields
+- **Don't put business logic in form handlers** – use services/facades. Form handlers should only coordinate (call service, flash message, redirect), not implement business rules.
+- **Don't create forms in action methods** – use `createComponent*` factory. Nette lazy-creates components, so the form only builds when actually needed.
+- **Don't set defaults in templates** – use `$form->setDefaults()` in `action*` method. Template manipulation of form state breaks separation of concerns.
+- **Don't skip setRequired()** – always mark required fields explicitly. Without it, empty strings pass validation silently and cause bugs downstream.
+- **Don't validate twice** – form validation handles both client and server side automatically. Manual checking in the handler duplicates work.
 
----
+### Online Documentation
 
-## Online Documentation
+For detailed information, use WebFetch on these URLs:
 
-For detailed information, fetch from doc.nette.org:
-
-- [Forms](https://doc.nette.org/en/forms) - complete forms guide
-- [Controls](https://doc.nette.org/en/forms/controls) - all form controls
-- [Validation](https://doc.nette.org/en/forms/validation) - validation rules
-- [Rendering](https://doc.nette.org/en/forms/rendering) - rendering options
+- [Forms](https://doc.nette.org/en/forms) – complete forms guide
+- [Controls](https://doc.nette.org/en/forms/controls) – all form controls
+- [Validation](https://doc.nette.org/en/forms/validation) – validation rules and conditions
+- [Rendering](https://doc.nette.org/en/forms/rendering) – rendering and Bootstrap integration

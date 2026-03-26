@@ -107,9 +107,11 @@ class Bootstrap
 config/
 ├── common.neon         # Shared framework config
 ├── services.neon       # Service definitions
-├── env.local.neon      # Local development (gitignored)
-└── env.prod.neon       # Production server
+├── env.local.neon      # Local development overrides (gitignored, create manually)
+└── env.prod.neon       # Production overrides (create manually)
 ```
+
+The skeleton ships with only `common.neon` and `services.neon`. Create environment-specific files as needed and load them in Bootstrap.
 
 ## Configuration (config/common.neon)
 
@@ -139,7 +141,6 @@ search:
 		classes:
 			- *Facade
 			- *Factory
-			- *Repository
 			- *Service
 ```
 
