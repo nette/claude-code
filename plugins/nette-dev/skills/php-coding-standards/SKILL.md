@@ -7,15 +7,7 @@ description: Invoke BEFORE writing or modifying any PHP code. Provides coding st
 
 ### Using nette/coding-standard
 
-Install globally using the `/install-php-fixer` command (from the `php-fixer` plugin).
-
-After installation, PHP files are automatically checked when edited. Do not run `ecs` manually.
-
-### Editing Workflow with Auto-Fixer
-
-The auto-fixer removes unused `use` statements. When editing PHP files:
-- **Always add `use` statements in the same edit as the code that references them**, or add the code first and `use` statements after
-- Never add `use` statements alone in a separate edit - they will be removed as unused before the next edit adds the referencing code
+Install globally using `/php-fixer:install-php-fixer`. After installation, PHP files are automatically fixed when edited - see the `php-auto-fixer` skill for editing workflow rules (especially `use` statement ordering).
 
 ### General Rules
 - Every PHP file must include `declare(strict_types=1)`

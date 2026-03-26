@@ -1,0 +1,75 @@
+---
+name: php-auto-fixer
+description: "CRITICAL: Read BEFORE writing or modifying any PHP file. A PostToolUse hook automatically runs nette/coding-standard (ECS) on every PHP file after each Edit or Write. The fixer removes unused `use` statements - so never add `use` statements in a separate edit before the code that references them. Always include `use` imports in the same edit as the referencing code, or add the code first then `use` statements. This skill should be used whenever creating new PHP files, editing existing PHP code, adding methods, refactoring, or fixing bugs in PHP - even for small one-line changes."
+---
+
+# PHP Auto-Fixer
+
+A PostToolUse hook runs `ecs fix` on every PHP file after each Edit or Write operation. The file is automatically reformatted and cleaned up - no manual formatting needed.
+
+## Editing Order for `use` Statements
+
+The fixer removes any `use` statement not referenced in the file. This creates a timing trap between consecutive edits:
+
+1. Edit adds `use App\Model\Foo;`
+2. Hook runs → `Foo` is not used anywhere → **removes the `use` statement**
+3. Next Edit adds code using `Foo` → **fails because the `use` is gone**
+
+### The Rule
+
+Always add `use` statements in the same Edit as the code that references them. Alternatively, add the code first, then add the `use` statement in a follow-up edit.
+
+Never add `use` statements alone in a separate Edit - they will be removed before the next edit adds the referencing code.
+
+### Safe Patterns
+
+**Single edit with both `use` and code** (preferred):
+
+```php
+use App\Model\UserRepository;
+
+public function getUsers(UserRepository $repo): array
+{
+    return $repo->findAll();
+}
+```
+
+**Code first, `use` second** (also safe):
+
+1. First Edit: add the method body referencing `UserRepository`
+2. Second Edit: add `use App\Model\UserRepository;` - now it's referenced, fixer keeps it
+
+**`use` first, code second** (broken):
+
+1. First Edit: add `use App\Model\UserRepository;` - fixer removes this immediately
+2. Second Edit: add method body - `UserRepository` undefined
+
+### Multiple Classes in One Edit
+
+When adding code that references several new classes, include all their `use` statements in the same edit. Do not split `use` statements and code across separate edits.
+
+## What the Fixer Does
+
+- Removes unused `use` statements
+- Sorts `use` statements alphabetically
+- Fixes indentation, spacing, and line breaks
+- Enforces PSR-12 with Nette modifications (e.g., no space before parentheses in arrow functions)
+
+Do not manually fix formatting - the fixer handles it automatically after every edit.
+
+## What Not to Do
+
+- Do not remove `use` statements manually - the fixer handles unused imports
+- Do not sort `use` statements manually - the fixer sorts them
+- Do not fix whitespace or indentation manually - the fixer fixes it
+
+## When the Fixer Reports Errors
+
+The hook exits with an error when ECS cannot auto-fix all issues. Common causes:
+
+- **PHP syntax error** in the file - fix the syntax first, fixer will run again on the next edit
+- **Conflicting rules** - rare, usually resolved by re-running (edit the file again)
+
+## Installation
+
+If the fixer is not installed, run `/php-fixer:install-php-fixer`.
