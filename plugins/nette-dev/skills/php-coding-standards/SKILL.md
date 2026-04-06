@@ -14,7 +14,7 @@ Install globally using `/php-fixer:install-php-fixer`. After installation, PHP f
 - Use two empty lines between methods - Nette convention for visual separation in longer classes
 - Document shut-up operator use: `@mkdir($dir); // @ - directory may already exist`
 - Document weak comparison operators: `// == accept null`
-- Multiple exceptions can be written in a single `exceptions.php` file
+- Multiple exceptions can be written in a single `exceptions.php` file, and multiple enums into `enums.php`
 - Interface methods don't need visibility as they're always public
 - All properties, return values, and parameters must have types
 - Final constants don't need types as they're self-evident
