@@ -49,7 +49,14 @@ if (pathinfo($filePath, PATHINFO_EXTENSION) !== 'php' || !file_exists($filePath)
 }
 
 // Fix coding standard issues automatically
-exec(escapeshellarg($ecs) . ' fix ' . escapeshellarg($filePath) . ' 2>&1', $output, $exitCode);
+exec(
+	escapeshellarg($ecs)
+	. ' fix ' . escapeshellarg($filePath)
+	. ' --config-file ' . escapeshellarg(__DIR__ . '/ncs.php')
+	. ' 2>&1',
+	$output,
+	$exitCode,
+);
 
 if ($exitCode === 0) {
 	exit(0);
