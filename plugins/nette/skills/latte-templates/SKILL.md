@@ -59,6 +59,13 @@ Filters modify output, written after `|`:
 
 Common filters: `upper`, `lower`, `capitalize`, `truncate`, `number`, `date`, `noescape`, `escapeUrl`, `stripHtml`, `trim`, `replace`, `first`, `last`, `length`, `sort`, `reverse`
 
+The filter `|` applies to the entire expression before it. Parentheses around PHP operators (like `??`) before a filter are unnecessary:
+
+```latte
+{$a ?? $b|texyLine|noescape}        {* correct – filter applies to result of ?? *}
+{($a ?? $b)|texyLine|noescape}      {* redundant – parentheses change nothing *}
+```
+
 See [the complete filter reference](references/filters.md) for all available filters.
 
 ### n:attributes

@@ -21,11 +21,45 @@ Write documentation when:
 - The "why" behind a design choice matters for callers
 
 ### Writing Style
+- Always American English (color, not colour; behavior, not behaviour)
 - Be concise and direct - avoid unnecessary words
 - Start method descriptions with 3rd person singular present tense verb: Returns, Formats, Checks, Creates, Converts, Sets
 - Skip phrases like "Class that...", "Interface for...", "Method that..."
 - Don't duplicate method lists or implementation details in class docblocks
 - Use active phrasing describing main responsibility
+
+### Preferred Phrases
+
+Use consistent phrasing for recurring situations:
+
+| Situation | Phrase |
+|-----------|--------|
+| Returns a value | "Returns..." |
+| Returns null on failure | "Returns X, or null if..." |
+| Checks a condition | "Checks whether..." |
+| Creates an object | "Creates..." |
+| Converts format | "Converts X to Y." |
+| Sets a value | "Sets..." |
+| Finds/searches | "Finds...", "Searches for..." |
+| Removes | "Removes..." |
+| Validates | "Validates..." |
+| Parses | "Parses..." |
+
+#### Boolean / predicate methods
+Describe the condition the method tests, not when it returns `true`. The return type already says it is a yes/no answer, so naming the truthy branch ("Returns true for...", "Returns true if...") just restates the signature.
+
+- Write what is being checked: "Checks whether...", "Determines whether...", "Tells whether..."
+- Don't enumerate the `true` case ("Returns true when...", "Returns true for...").
+- Edge cases worth noting belong in the same sentence as the condition, not as a list of return values.
+
+For example, a validator method is documented as *"Checks whether the address is a syntactically valid IPv4 or IPv6 address, including IPv4-mapped IPv6."* - the focus is the condition, and the special case rides along in the same clause.
+
+### Consistency
+
+Across the whole codebase keep documentation uniform:
+- All comments should look like they're from one author
+- Same level of detail for similar methods
+- Same formulations for similar situations
 
 ### Property Documentation
 Use single-line format for simple `@var` annotations:

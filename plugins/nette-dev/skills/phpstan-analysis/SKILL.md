@@ -1,6 +1,6 @@
 ---
 name: phpstan-analysis
-description: Invoke BEFORE running PHPStan or fixing PHPStan errors. Covers error resolution strategy (refactoring > phpDoc > ignoring), common Nette error patterns, baseline management, and type tests. Use this whenever the user mentions PHPStan, static analysis, type errors, or wants to suppress warnings - even for a single error.
+description: Invoke BEFORE running PHPStan or fixing PHPStan errors. Covers error resolution strategy (refactoring > phpDoc > ignoring), common Nette error patterns, baseline management, and type tests. Use this whenever the user mentions PHPStan, static analysis, type errors, wants to suppress warnings, or manage the baseline - even for a single error.
 ---
 
 ## PHPStan Analysis
@@ -29,38 +29,70 @@ Target level for Nette libraries is **8**. Levels higher than 8 are not worth pu
 
 ### nette/phpstan-rules
 
-All Nette libraries use `nette/phpstan-rules`. It provides:
-- **Precise return types** for `Strings::match()`, `matchAll()`, `split()`, `Arrays::invoke()`, etc.
-- **Removes `|false` and `|null`** from PHP functions where error values are unrealistic (`getcwd`, `json_encode`, `preg_split`, etc.)
-- **Assert type narrowing** after `Tester\Assert` calls (`notNull()`, `type()`, `true()`)
-- **False positive suppression** for Nette patterns (arrow functions as void callbacks, runtime validation closures)
+Installed by all Nette libraries. Transparently narrows types and silences false positives — many PHPStan errors disappear without manual fixes. Don't add asserts, casts, or `@var` for errors that fall into these categories:
+
+- **Nette helpers**: `Strings::match()`, `Arrays::invoke()`, `Helpers::falseToNull()`, `Expect::array()`, `Html` magic methods (`setXxx`/`getXxx`/`addXxx`), `Container::getComponent()` and `$this['name']`, Form `$form['name']`
+- **Native PHP functions**: `|false` / `|null` removed where unrealistic (`getcwd`, `json_encode`, `preg_*`, intl/GD/DOM/etc.)
+- **After `Tester\Assert`**: `notNull()`, `type()`, `true()`, etc. narrow the type
+- **Silenced false positives**: arrow fns passed to `test()` / `Assert::exception()`, runtime variadic-closure type validation, Form event-handler callbacks with narrow data parameter
+
+Two features require config in `phpstan.neon` (NOT app's `common.neon`):
+
+**Database row mapping** — narrows `Explorer::table()`, `ActiveRow::related()`, `::ref()` to concrete row classes. Keys may contain a single `*` wildcard; a bare `*` is the catch-all and substitutes PascalCase of the table name into `*` in the value. Exact keys win over wildcards; wildcards are tried in declaration order.
+
+```neon
+parameters:
+	nette:
+		database:
+			mapping:
+				tables:
+					booking: App\Entity\BookingRow   # exact match
+					event_*: App\Entity\Event*Row    # event_video → EventVideoRow
+					*: App\Entity\*Row               # catch-all fallback
+```
+
+**Asset type narrowing** — narrows `Registry::getMapper()` / `getAsset()` / `tryGetAsset()` (and `FilesystemMapper::getAsset()` / `ViteMapper::getAsset()`) based on mapper ID and file extension. Values `file` and `vite` are shortcuts for the built-in `FilesystemMapper` / `ViteMapper`; any other value is treated as an FQCN of a custom mapper class.
+
+```neon
+parameters:
+	nette:
+		assets:
+			mapping:
+				default: file              # FilesystemMapper
+				images: file
+				vite: vite                 # ViteMapper
+				custom: App\MyMapper       # custom mapper FQCN
+```
+
+Full reference: https://doc.nette.org/en/best-practices/phpstan-rules
 
 ---
 
 ## Error Resolution Strategy
+
+### Resolution Priority
+
+Resolve every error in this order of preference. Only fall back to the next step when the current one genuinely doesn't apply — this ladder is the backbone of the whole skill:
+
+1. **Refactoring** - if an error reveals a design weakness, fix the design first
+2. **phpDoc** - if the code is correct but its types are imprecise
+3. **`assert()`** - sparingly, only when the type cannot be expressed otherwise
+4. **Ignore in `phpstan.neon`** - for systematic or intentional patterns, always with a comment explaining why
+5. **Baseline** - last resort, keep minimal
+
+Two hard rules override the ladder at every step:
+
+- **Never silence errors** - a fix must not hide a potential problem (see "Never Silence Errors" below).
+- **Never use `@phpstan-ignore` annotations** - keep checker-specific directives out of source code; ignore in `phpstan.neon` instead.
 
 ### Create a Plan First
 
 Before making any changes, create a plan:
 
 1. **Group errors by type** (`property.nonObject`, `method.notFound`, `new.static`, etc.)
-2. **For each type, choose resolution** (in order of preference):
-   - **Refactoring** - does the error reveal a design issue?
-   - **Better type annotations** - code is correct but types need clarification via phpDoc
-   - **Ignoring** - false positive or not worth fixing (last resort)
+2. **For each type, choose a resolution** following the priority order above
 3. **Justify each decision** with clear reasoning
 4. **Present the plan** before implementing
-
-### General Principles
-
-1. **Prefer refactoring** - if an error reveals a design weakness, fix the design first
-2. **Then consider phpDoc** - if the code is correct but types are imprecise
-3. **Suppress only as last resort** - only for false positives or intentional design patterns
-4. **Never silence errors** - a fix must not hide potential problems (see "Never Silence Errors" section below for examples)
-5. **Never use `@phpstan-ignore` annotations** - keep checker-specific directives out of source code
-6. Use `assert()` sparingly, only when type information cannot be expressed otherwise
-7. Systematic patterns: ignore in `phpstan.neon` with a comment explaining why
-8. Use baseline as last resort, minimize
 
 ### Refactoring as First Choice
 
@@ -93,7 +125,7 @@ function foo(): string {
 }
 ```
 
-Better solutions: use `Json::encode()`, add explicit check with exception, or ignore in baseline.
+Better solutions, in order: use `Json::encode()`, or add an explicit check that throws. Only when neither applies, fall back to the baseline (last resort, per the resolution priority).
 
 ### Throw Expression Pattern
 
@@ -108,6 +140,44 @@ $f = fopen($file, 'r') ?: throw new IOException("Cannot open file $file");
 ### Beware of `/** @var */` in Method Bodies
 
 `/** @var Type */` in method body is taken authoritatively by PHPStan - it completely disables type checking for that variable. Use only when no better solution exists.
+
+### Don't "refine" bare `callable` into `callable(...mixed): mixed`
+
+When PHPStan reports a missing callable signature (`missingType.callable`), it's tempting to write `callable(...mixed): mixed`. **Don't.** That type is *narrower* than bare `callable`, not wider, because of parameter contravariance:
+
+- `callable(...mixed): mixed` claims the callee may be invoked with *any* arguments, so only callbacks whose parameters are all `mixed`-compatible (or which have no required typed params) satisfy it.
+- A normal callback like `function (UiForm $form, mixed $value): void {}` is then **rejected** at call sites: `expects callable(mixed...): mixed, Closure(UiForm, mixed): void given`.
+
+Bare `callable` is PHPStan's top type for callables — it accepts anything invokable regardless of signature, and `$cb(...$args)` inside the function still type-checks. So for "invoke arbitrary user callbacks" APIs keep `callable` (e.g. `@param iterable<callable> $callbacks`) and, if `missingType.callable` fires, ignore it for that file in `phpstan.neon` with a comment. An explicit signature buys nothing and introduces false positives. (Confirmed in nette/utils `Arrays::invoke()`.)
+
+The same applies to bare **`\Closure`** — when the value is guaranteed to be a closure (stored property, result of `Closure::fromCallable()`, etc.) but its signature is unknown or intentionally polymorphic, use plain `\Closure` without parameters. `missingType.callable` then fires on it too and is ignored on the same grounds.
+
+**Readability tip — wrap typed callables in parentheses.** When a callable/Closure type has a signature *and* appears in a union or alongside other type fragments, wrap it in `(...)` so the reader can see where the signature ends:
+
+```php
+// Hard to parse — does |null belong to the return type, or to the whole callable?
+/** @var callable(): void|null $cb */
+
+// Clear — the callable is one alternative, null is the other
+/** @var (callable(): void)|null $cb */
+
+// Same for Closure
+/** @var (\Closure(int): string)|null $cb */
+```
+
+The parentheses are purely cosmetic for PHPStan (it parses both forms identically), but they save the reader from re-reading the line.
+
+### Beware of `?:` operator with falsy values
+
+The `?:` operator treats `0`, `0.0`, `'0'`, `''`, `[]`, `null`, and `false` as falsy. This is dangerous when the value can legitimately be `'0'` or `0`:
+
+```php
+// BUG - returns $default when $value is '0' or 0
+$result = $value ?: $default;
+
+// Correct - only replaces null
+$result = $value ?? $default;
+```
 
 ---
 
@@ -159,6 +229,8 @@ assert($component instanceof Component);
 $component->saveState($params);
 ```
 
+Note: when accessing components via `$this['name']` or `$this->getComponent('name')` with a constant string and a matching `createComponent<Name>()` factory on the same class, phpstan-rules narrows the type automatically — no assert needed. The assert pattern above applies when the name is dynamic or the factory lives elsewhere.
+
 ### `property.uninitializedReadonly` / `property.readOnlyAssignNotInConstructor`
 
 Readonly properties initialized via inject methods (Nette DI pattern). Ignore - this is an intentional framework pattern.
@@ -183,27 +255,80 @@ Verify if the catch is actually needed. If so, ignore.
 
 ## Ignoring Errors
 
-### Priority
+Ignoring sits at the bottom of the resolution ladder (see "Resolution Priority") — exhaust refactoring, phpDoc, and `assert()` first. When ignoring is genuinely the right call, prefer `phpstan.neon` for systematic or intentional patterns (always with a comment) over `phpstan-baseline.neon` (last resort, minimize).
 
-1. **Fix** - always prefer
-2. **phpstan.neon** - for systematic/intentional patterns, always with a comment
-3. **phpstan-baseline.neon** - last resort, minimize
+### Forbidden and Discouraged Suppressions
+
+These rules apply to **both** `phpstan.neon` `ignoreErrors` and `phpstan-baseline.neon`.
+
+**MUST NOT be suppressed — always fix:**
+
+- **`phpDoc.parseError`** — broken phpDoc syntax. Suppressing it leaves the phpDoc permanently unparseable; fix the syntax.
+- **`argument.templateType`** — a generic template parameter cannot be inferred from arguments. The template is either misdesigned or redundant; redesign the generic or drop the template parameter.
+- **Anything in `tests/types/*`** — these files are the library's type contract (`TypeAssert` / `assertType`). Suppressing an error here silently invalidates the contract and defeats the purpose of type tests.
+
+**SHOULD NOT be suppressed — fix unless truly unavoidable:**
+
+- **`missingType.*`** (e.g. `missingType.iterableValue`, `missingType.parameter`, `missingType.return`) — the type is almost always expressible (`array<…>`, concrete class, `list<>`, `array{…}`). Suppress only when the type genuinely cannot be expressed. Exception: `missingType.callable` for "invoke arbitrary user callbacks" APIs (see "Don't refine bare `callable`" above) — that one is legitimate.
+- **`parameter.phpDocType`** — phpDoc type doesn't match native type. This is almost always a real documentation bug; fix the phpDoc rather than hide it.
 
 ### Systematic Patterns in phpstan.neon
+
+**Target ignores narrowly — never write a blank check.** An entry like
+
+```neon
+# WRONG — blanket suppression hides every future method.notFound in this file
+-   identifier: method.notFound
+	path: src/Forms/Controls/SubmitButton.php
+```
+
+silences not only the intended pattern but every future legitimate `method.notFound` in that file — including real typos and broken refactorings.
+
+#### The model pattern: one bullet = one specific phenomenon
+
+Each entry should describe a **single concrete phenomenon** — a specific message in a specific scope — not "ignore identifier X in file Y". Constraining tools, in order of strength:
+
+- **`message:`** — regex matching the exact error message. The strongest safeguard: protects against future drift of *different* errors with the same `identifier` in the same file. Always include it when the message is reasonably stable.
+- **`count:`** — pin the number of occurrences. If a new instance appears (or one disappears), PHPStan reports a mismatch and the developer is forced to look.
+- **`identifier:`** — narrows to one error kind.
+- **Path scoping** — three forms, choose the most specific:
+  - **`path: src/Foo/Bar.php`** — single file (preferred when the phenomenon lives in one file)
+  - **`path: src/Foo/Bar/*`** — wildcard mask for a directory tree (when the same phenomenon recurs across siblings)
+  - **`paths: [...]`** — explicit list of files (when the phenomenon lives in a handful of unrelated files)
+
+**Important: `count:` requires `path:` (singular), not `paths:` (plural).** With a wildcard mask in `path:` you still get `count:` — that's the compact form for "this phenomenon appears N times across this tree". With `paths:` you sacrifice `count:` for enumeration; compensate with a tight `message:` regex.
+
+#### Canonical examples
 
 ```neon
 parameters:
 	ignoreErrors:
-		-   # Intentional design pattern for derive() and factory methods
+		# One phenomenon across a directory tree (wildcard path + count)
+		-   # Latte nodes use new static() by design for extensibility
 			identifier: new.static
-			paths:
-				- src/Caching/Cache.php
-				- src/Bridges/CacheLatte/Nodes/CacheNode.php
+			path: src/Bridges/FormsLatte/Nodes/*
+			count: 6
 
-		-   # Runtime validation for untyped array input
-			identifier: function.alreadyNarrowedType
-			path: src/Caching/Cache.php
+		# One phenomenon across an explicit list of files (paths array + tight message regex)
+		-   # parent::getControl()/getLabel() returns the wider public contract (Html|string|null),
+			# but BaseControl implementation deterministically returns Html, so chaining is safe.
+			identifier: method.nonObject
+			message: '#^Cannot call method \w+\(\) on Nette\\Utils\\Html\|string(\|null)?\.$#'
+			paths:
+				- src/Forms/Controls/Checkbox.php
+				- src/Forms/Controls/CheckboxList.php
+				- src/Forms/Controls/RadioList.php
+
+		# One phenomenon in one file (single path + message + count — strongest form)
+		-   # SubmitButton::getScopeForValidation() walks getParent() which is typed as
+			# Container|Control; lookupPath() exists on Container at runtime.
+			identifier: method.notFound
+			message: '#^Call to an undefined method Nette\\Forms\\Container\|Nette\\Forms\\Control::lookupPath\(\)\.$#'
+			path: src/Forms/Controls/SubmitButton.php
+			count: 1
 ```
+
+**Canonical reference:** `nette/forms` `phpstan.neon` follows this pattern throughout — use it as the template when refactoring other configs.
 
 Always include a comment explaining why the error is ignored.
 

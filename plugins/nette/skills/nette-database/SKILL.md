@@ -25,16 +25,18 @@ See [the SQL query reference](references/sql-way.md) for direct SQL queries.
   - never use TIMESTAMP for date/time fields
 
 
-### Database Explorer
+### Entity Mapping
 
-Extends Nette Database Explorer to automatically map database tables to typed entity classes.
+Nette Database has a built-in `EntityMapping` interface (since 3.2) that the Explorer uses to resolve an `ActiveRow` subclass for each table and (optionally) translate between column names and PHP property names. The default implementation (`DefaultEntityMapping`) supports:
 
-**Core benefit:** Zero-configuration entity mapping with full IDE support.
-**How it works:** Converts table names (snake_case) to entity class names (PascalCase + Row suffix).
+- **Table-to-class map with wildcards.** Keys may be exact names (`special_table`), wildcard patterns (`forum_*`) or a bare `*` catch-all. Class names may contain `*`, which is replaced with the PascalCase of the captured portion: `forum_post` + `App\Forum\*Row` → `App\Forum\PostRow`. A class without `*` is a fixed class (`log_*: App\Logging\LogRow` maps every `log_*` table to the same `LogRow`). Schema prefixes like `public.` are stripped before PascalCase conversion. Exact keys take precedence; wildcard entries are tried in declaration order, so put more specific patterns first and the bare `*` last.
+- **camelCase column ↔ property translation** — when enabled, column `author_id` is exposed as property `authorId` everywhere: property access, iteration, `toArray()`, `insert()`, `update()`, and column references in `where()` / `order()`.
+
+Activate via the `mapping` config option (see Database Configuration below).
 
 ### Entity Design Strategy
 
-All entities in `App\Entity` with consistent `Row` suffix:
+All entities in `App\Entity` with consistent `Row` suffix (matches the `App\Entity\*Row` convention):
 
 - `product` table → `ProductRow`
 - `order_item` table → `OrderItemRow`
@@ -84,6 +86,8 @@ final class ProductRow extends Table\ActiveRow
 - `@property-read Selection<OrderItemRow> $order_items` for back-references
 
 **Naming convention:** Follow Nette Database relationship naming (foreign key without _id suffix).
+
+**With `camelCase: true` mapping:** scalar columns map to camelCase properties (`$firstName`, `$createdAt`). Relationship property names (`$author`, `$category`) are resolved by `Conventions` against database columns, so they aren't affected by the camelCase setting.
 
 ### When to Use Selection API
 
@@ -231,11 +235,29 @@ database:
 	dsn: 'mysql:host=127.0.0.1;dbname=myapp'
 	user: root
 	password: secret
+
+	# Entity mapping (table → ActiveRow subclass, optional column ↔ property)
+	mapping:
+		tables: App\Entity\*Row    # string shortcut: equivalent to { '*': 'App\Entity\*Row' }
+
 	options:
 		lazy: true              # Connect on first query
 		charset: utf8mb4        # Default
 		convertBoolean: true    # TINYINT(1) to bool
 		newDateTime: true       # Return DateTimeImmutable
+```
+
+Full mapping form when you need explicit overrides or camelCase properties:
+
+```neon
+database:
+	dsn: 'mysql:host=127.0.0.1;dbname=myapp'
+	mapping:
+		tables:
+			special_table: App\Entity\SpecialRow    # exact match wins over wildcards
+			forum_*: App\Forum\*Row                 # wildcard in key (* captured as PascalCase)
+			"*": App\Entity\*Row                    # catch-all fallback (must be last)
+		camelCase: true         # column author_id ↔ property authorId
 ```
 
 Multiple connections:
