@@ -49,6 +49,7 @@ Best practices and conventions for building applications with Nette Framework. I
 | **frontend-development** | Vite, ESLint, Tailwind, Nette Assets integration |
 | **latte-templates** | Latte templating system, layouts, filters, template classes |
 | **neon-format** | NEON data format syntax, mappings, sequences, entities |
+| **tracy-debugging** | Debugging PHP errors via Tracy: BlueScreen, Tracy Bar, dump, console output |
 
 ### `nette-dev` – For Framework Contributors
 
@@ -59,6 +60,7 @@ Coding standards and conventions for contributing to the Nette Framework itself.
 | **php-coding-standards** | PHP formatting, naming conventions, code style |
 | **php-doc** | phpDoc documentation best practices |
 | **commit-messages** | Commit message conventions for Nette repositories |
+| **phpstan-analysis** | PHPStan error resolution, baselines, type tests, common Nette patterns |
 
 ### `php-fixer` – Automatic PHP Style Fixing
 
