@@ -44,13 +44,19 @@ $input = json_decode(file_get_contents('php://stdin'));
 $filePath = $input->tool_input->file_path ?? '';
 
 // Skip if not a PHP file
-if (pathinfo($filePath, PATHINFO_EXTENSION) !== 'php' || !file_exists($filePath)) {
+if (!in_array(pathinfo($filePath, PATHINFO_EXTENSION), ['php', 'phpt'], true) || !file_exists($filePath)) {
 	exit(0);
 }
 
 // Skip paths excluded in the project's .nette-claude.json
 require __DIR__ . '/hook-config.php';
 if (isExcluded($filePath, 'fix-php-style')) {
+	exit(0);
+}
+
+// Don't run the fixer on invalid PHP (lint-php reports syntax errors); avoids ECS errors
+exec(escapeshellarg(PHP_BINARY) . ' -l ' . escapeshellarg($filePath) . ' 2>&1', $lint, $lintExit);
+if ($lintExit !== 0) {
 	exit(0);
 }
 

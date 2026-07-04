@@ -63,6 +63,7 @@ Validates files after every edit and reports errors straight back to Claude:
 
 | Hook | Checks |
 |------|--------|
+| **lint-php** | PHP syntax via `php -l` after every `.php`/`.phpt` edit |
 | **lint-latte** | Latte templates via the project's `latte-lint` |
 | **lint-neon** | NEON syntax via the project's `neon-lint` |
 | **lint-js** | ESLint `--fix` on `.js/.ts/.mjs/.mts` (only if the project has an ESLint config) |
@@ -101,7 +102,7 @@ The validation and fixing hooks run automatically after every edit. To exclude c
 }
 ```
 
-Available hooks: `fix-php-style` (`.php`), `lint-latte` (`.latte`), `lint-neon` (`.neon`), `lint-js` (`.js/.ts`).
+Available hooks: `lint-php` (`.php/.phpt`), `lint-latte` (`.latte`), `lint-neon` (`.neon`), `lint-js` (`.js/.ts`), `fix-php-style` (`.php/.phpt`).
 
 Pattern semantics (gitignore-like), resolved relative to the directory containing `.nette-claude.json`:
 

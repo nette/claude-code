@@ -1,10 +1,14 @@
 {
-	"description": "Validate Latte templates, NEON files, and JavaScript/TypeScript",
+	"description": "Validate PHP, Latte templates, NEON files, and JavaScript/TypeScript",
 	"hooks": {
 		"PostToolUse": [
 			{
 				"matcher": "Edit|Write",
 				"hooks": [
+					{
+						"type": "command",
+						"command": "php ${CLAUDE_PLUGIN_ROOT}/hooks/lint-php.php"
+					},
 					{
 						"type": "command",
 						"command": "php ${CLAUDE_PLUGIN_ROOT}/hooks/lint-latte.php"
