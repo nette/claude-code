@@ -18,7 +18,7 @@ Then install the plugin:
 /plugin install nette@nette
 ```
 
-For automatic validation of PHP, Latte, NEON and JavaScript files after each edit:
+For automatic validation of PHP, Latte, NEON, JSON and JavaScript files after each edit:
 
 ```
 /plugin install nette-lint@nette
@@ -66,6 +66,7 @@ Validates files after every edit and reports errors straight back to Claude:
 | **lint-php** | PHP syntax via `php -l` after every `.php`/`.phpt` edit |
 | **lint-latte** | Latte templates via the project's `latte-lint` |
 | **lint-neon** | NEON syntax via the project's `neon-lint` |
+| **lint-json** | JSON/JSONC syntax via the bundled `seld/jsonlint` (reports the exact line; comments and trailing commas are tolerated in `.jsonc`, `tsconfig.json`, `.vscode/*.json`) |
 | **lint-js** | ESLint `--fix` on `.js/.ts/.mjs/.mts` (only if the project has an ESLint config) |
 
 ### `nette-dev` – For Framework Contributors
@@ -102,7 +103,17 @@ The validation and fixing hooks run automatically after every edit. To exclude c
 }
 ```
 
-Available hooks: `lint-php` (`.php/.phpt`), `lint-latte` (`.latte`), `lint-neon` (`.neon`), `lint-js` (`.js/.ts`), `fix-php-style` (`.php/.phpt`).
+Available hooks: `lint-php` (`.php/.phpt`), `lint-latte` (`.latte`), `lint-neon` (`.neon`), `lint-json` (`.json/.jsonc`), `lint-js` (`.js/.ts`), `fix-php-style` (`.php/.phpt`).
+
+`lint-json` treats `.jsonc`, `tsconfig*.json`, `jsconfig*.json`, `devcontainer.json` and anything under `.vscode/` as JSONC (comments and trailing commas allowed). To mark additional files as JSONC, add a `jsonc` list of the same gitignore-like patterns:
+
+```json
+{
+	"lint-json": {
+		"jsonc": ["config/*.json"]
+	}
+}
+```
 
 Pattern semantics (gitignore-like), resolved relative to the directory containing `.nette-claude.json`:
 

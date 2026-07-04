@@ -43,7 +43,7 @@ Hooks run **in parallel and in non-deterministic order**, so each must be robust
 
 ### Per-project configuration: `.nette-claude.json`
 
-Read exclusively by the hooks, looked up upwards from the edited file (like `.gitignore`). Each top-level key is a hook name (`lint-php`, `lint-latte`, `lint-neon`, `lint-js`, `fix-php-style`) with an `exclude` list of gitignore-like patterns resolved relative to the config directory:
+Read exclusively by the hooks, looked up upwards from the edited file (like `.gitignore`). Each top-level key is a hook name (`lint-php`, `lint-latte`, `lint-neon`, `lint-json`, `lint-js`, `fix-php-style`) with an `exclude` list of gitignore-like patterns resolved relative to the config directory. `lint-json` additionally accepts a `jsonc` list marking extra files as JSONC (comments + trailing commas allowed):
 
 ```json
 {
