@@ -70,6 +70,20 @@ The hook exits with an error when ECS cannot auto-fix all issues. Common causes:
 - **PHP syntax error** in the file - fix the syntax first, fixer will run again on the next edit
 - **Conflicting rules** - rare, usually resolved by re-running (edit the file again)
 
+## Excluding Paths
+
+To stop the fixer from touching certain paths (e.g. `fixtures` folders), add a `.nette-claude.json` file to the project root. It is shared by all Nette Claude Code hooks; each top-level key is a hook name:
+
+```json
+{
+	"fix-php-style": {
+		"exclude": ["fixtures*"]
+	}
+}
+```
+
+Patterns are gitignore-like, relative to the config file: a pattern without a slash (`fixtures`, `fixtures*`) matches a segment at any depth; a pattern with a slash (`tests/**/temp`) is a glob anchored to the config directory. The file is looked up upwards from the edited file.
+
 ## Installation
 
 If the fixer is not installed, run `/php-fixer:install-php-fixer`.

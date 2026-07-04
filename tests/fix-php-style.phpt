@@ -4,7 +4,7 @@ use Tester\Assert;
 
 require __DIR__ . '/bootstrap.php';
 
-$scriptPath = __DIR__ . '/../plugins/nette-dev/hooks/fix-php-style.php';
+$scriptPath = __DIR__ . '/../plugins/php-fixer/hooks/fix-php-style.php';
 $fixturesDir = __DIR__ . '/fixtures';
 
 

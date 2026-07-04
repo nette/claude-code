@@ -14,6 +14,12 @@ if (pathinfo($filePath, PATHINFO_EXTENSION) !== 'latte' || !file_exists($filePat
 	exit(0);
 }
 
+// Skip paths excluded in the project's .nette-claude.json
+require __DIR__ . '/hook-config.php';
+if (isExcluded($filePath, 'lint-latte')) {
+	exit(0);
+}
+
 // Use project's custom latte-lint if exists, otherwise skip
 $latteLint = $cwd . '/latte-lint';
 if (PHP_OS_FAMILY === 'Windows') {

@@ -82,6 +82,34 @@ Coding standards and conventions for contributing to the Nette Framework itself.
 
 Optional plugin that automatically fixes PHP code style after each edit using [nette/coding-standard](https://github.com/nette/coding-standard).
 
+## Configuration
+
+Project-level behavior of these plugins is configured through a `.nette-claude.json` file in your project, read exclusively by the plugins' own hooks. It is looked up upwards from the edited file (like `.gitignore`), so in a monorepo each package can have its own.
+
+### Excluding files from hooks
+
+The validation and fixing hooks run automatically after every edit. To exclude certain paths (typically `fixtures` folders with intentionally broken templates, NEON or PHP), give a hook an `exclude` list. Each top-level key is a hook name:
+
+```json
+{
+	"fix-php-style": {
+		"exclude": ["fixtures*"]
+	},
+	"lint-latte": {
+		"exclude": ["tests/**/broken"]
+	}
+}
+```
+
+Available hooks: `fix-php-style` (`.php`), `lint-latte` (`.latte`), `lint-neon` (`.neon`), `lint-js` (`.js/.ts`).
+
+Pattern semantics (gitignore-like), resolved relative to the directory containing `.nette-claude.json`:
+
+- a pattern **without** a slash (`fixtures`, `fixtures*`) matches a path segment of that name at **any depth**;
+- a pattern **with** a slash (`tests/**/broken`) is a glob **anchored to the config directory**;
+- `*` matches within a single segment, `**` spans directories;
+- matching a directory excludes its contents too.
+
 ## Usage
 
 Skills are automatically activated based on conversation context. For example:

@@ -20,6 +20,9 @@ Each plugin contains:
 Some plugins also include:
 - `hooks/` - PostToolUse hooks for file validation/fixing (`nette-lint`, `php-fixer`)
 
+Duplicated across plugins:
+- `hooks/hook-config.php` - Helper required by each plugin's hooks (`require __DIR__ . '/hook-config.php'`). Reads the project's `.nette-claude.json`. Plugins install **independently** (each into its own `cache/<marketplace>/<plugin>/<version>/` directory - a sibling `shared/` folder is NOT copied), so this file is **copied** into every hook-carrying plugin (`nette-lint`, `php-fixer`). Keep the copies in sync.
+
 ## Testing Plugins Locally
 
 Enable plugins in development:
@@ -30,11 +33,25 @@ claude code --plugin /path-to/claude-code/plugins/nette
 
 ## Hook Scripts
 
-Hooks use PHP to parse JSON input from stdin. They follow this pattern:
-1. Read JSON input via `cat`
-2. Extract `file_path` and `cwd` using PHP's `json_decode`
-3. Check file extension before processing
-4. Exit 0 on success, exit 2 on error (with stderr output)
+Standalone PHP scripts run on PostToolUse (`Edit|Write`). Each one:
+1. Reads JSON input from stdin (`file_path`, `cwd`) via `file_get_contents('php://stdin')` + `json_decode`
+2. Checks the file extension and skips non-matching files (exit 0)
+3. Skips paths excluded in the project's `.nette-claude.json` via `isExcluded()` from the plugin's own `hooks/hook-config.php`
+4. Runs its tool, then exits 0 on success or exit 2 on error (with stderr output)
+
+Hooks run **in parallel and in non-deterministic order**, so each must be robust on its own - do not rely on one hook running before another. For example `fix-php-style` runs `php -l` itself and silently skips invalid PHP instead of depending on `lint-php`.
+
+### Per-project configuration: `.nette-claude.json`
+
+Read exclusively by the hooks, looked up upwards from the edited file (like `.gitignore`). Each top-level key is a hook name (`lint-php`, `lint-latte`, `lint-neon`, `lint-js`, `fix-php-style`) with an `exclude` list of gitignore-like patterns resolved relative to the config directory:
+
+```json
+{
+	"fix-php-style": {
+		"exclude": ["fixtures*"]
+	}
+}
+```
 
 ## Skill Files
 

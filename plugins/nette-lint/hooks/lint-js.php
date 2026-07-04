@@ -14,6 +14,12 @@ if (!preg_match('~\.(js|ts|mjs|mts)$~', $filePath) || !file_exists($filePath)) {
 	exit(0);
 }
 
+// Skip paths excluded in the project's .nette-claude.json
+require __DIR__ . '/hook-config.php';
+if (isExcluded($filePath, 'lint-js')) {
+	exit(0);
+}
+
 // Skip if no ESLint config in project
 if (
 	!glob($cwd . '/eslint.config.*')

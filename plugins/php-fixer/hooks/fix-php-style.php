@@ -48,6 +48,12 @@ if (pathinfo($filePath, PATHINFO_EXTENSION) !== 'php' || !file_exists($filePath)
 	exit(0);
 }
 
+// Skip paths excluded in the project's .nette-claude.json
+require __DIR__ . '/hook-config.php';
+if (isExcluded($filePath, 'fix-php-style')) {
+	exit(0);
+}
+
 // Fix coding standard issues automatically
 exec(
 	escapeshellarg($ecs)

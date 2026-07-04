@@ -13,6 +13,12 @@ if (pathinfo($filePath, PATHINFO_EXTENSION) !== 'neon' || !file_exists($filePath
 	exit(0);
 }
 
+// Skip paths excluded in the project's .nette-claude.json
+require __DIR__ . '/hook-config.php';
+if (isExcluded($filePath, 'lint-neon')) {
+	exit(0);
+}
+
 // Use project's neon-lint if exists, otherwise skip
 $neonLint = $cwd . '/vendor/bin/neon-lint';
 if (PHP_OS_FAMILY === 'Windows') {
