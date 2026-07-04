@@ -6,7 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository contains Claude Code plugins for the Nette Framework ecosystem:
 
-- **`plugins/nette/`** - For developers building Nette Framework applications (includes Latte/NEON/ESLint validation hooks)
+- **`plugins/nette/`** - For developers building Nette Framework applications (skills only)
+- **`plugins/nette-lint/`** - Automatic validation hooks for PHP, Latte, NEON and JavaScript/TypeScript
 - **`plugins/nette-dev/`** - For Nette Framework contributors (coding standards and conventions)
 - **`plugins/php-fixer/`** - Optional automatic PHP style fixing using nette/coding-standard
 
@@ -17,7 +18,7 @@ Each plugin contains:
 - `skills/` - Contextual documentation that activates based on conversation
 
 Some plugins also include:
-- `hooks/` - PostToolUse hooks for file validation/fixing (nette, php-fixer)
+- `hooks/` - PostToolUse hooks for file validation/fixing (`nette-lint`, `php-fixer`)
 
 ## Testing Plugins Locally
 

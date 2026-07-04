@@ -4,7 +4,7 @@ use Tester\Assert;
 
 require __DIR__ . '/bootstrap.php';
 
-$scriptPath = __DIR__ . '/../plugins/nette/hooks/lint-latte.php';
+$scriptPath = __DIR__ . '/../plugins/nette-lint/hooks/lint-latte.php';
 $fixturesDir = __DIR__ . '/fixtures';
 
 

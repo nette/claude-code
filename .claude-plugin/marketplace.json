@@ -13,6 +13,12 @@
 			"homepage": "https://ai.nette.org/en/claude-code"
 		},
 		{
+			"name": "nette-lint",
+			"source": "./plugins/nette-lint",
+			"category": "development",
+			"homepage": "https://ai.nette.org/en/claude-code"
+		},
+		{
 			"name": "nette-dev",
 			"source": "./plugins/nette-dev",
 			"category": "development",

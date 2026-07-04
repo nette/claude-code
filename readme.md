@@ -18,6 +18,12 @@ Then install the plugin:
 /plugin install nette@nette
 ```
 
+For automatic validation of PHP, Latte, NEON and JavaScript files after each edit:
+
+```
+/plugin install nette-lint@nette
+```
+
 Optionally, Nette Framework contributors can also install:
 
 ```
@@ -35,7 +41,7 @@ For automatic PHP code style fixing:
 
 ### `nette` – For Application Developers
 
-Best practices and conventions for building applications with Nette Framework. Includes automatic Latte template and NEON file validation.
+Best practices and conventions for building applications with Nette Framework — a broad set of skills covering all major areas of Nette development.
 
 | Skill | Description |
 |-------|-------------|
@@ -50,6 +56,16 @@ Best practices and conventions for building applications with Nette Framework. I
 | **latte-templates** | Latte templating system, layouts, filters, template classes |
 | **neon-format** | NEON data format syntax, mappings, sequences, entities |
 | **tracy-debugging** | Debugging PHP errors via Tracy: BlueScreen, Tracy Bar, dump, console output |
+
+### `nette-lint` – Automatic Validation
+
+Validates files after every edit and reports errors straight back to Claude:
+
+| Hook | Checks |
+|------|--------|
+| **lint-latte** | Latte templates via the project's `latte-lint` |
+| **lint-neon** | NEON syntax via the project's `neon-lint` |
+| **lint-js** | ESLint `--fix` on `.js/.ts/.mjs/.mts` (only if the project has an ESLint config) |
 
 ### `nette-dev` – For Framework Contributors
 
