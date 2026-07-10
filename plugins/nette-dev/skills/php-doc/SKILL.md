@@ -1,6 +1,7 @@
 ---
 name: php-doc
-description: Invoke BEFORE writing phpDoc. Provides Nette conventions for docblocks: when to skip documentation, class/method/property/exception docs, generic array types (array<T>, list<T>), conditional return types. Use this whenever writing or editing any /** */ comment - even when the user just says "document this" without mentioning phpDoc.
+description: >-
+  Invoke BEFORE writing phpDoc. Provides Nette conventions for docblocks: when to skip documentation, class/method/property/exception docs, generic array and list types, conditional return types. Use this whenever writing or editing any /** */ comment - even when the user just says "document this" without mentioning phpDoc.
 ---
 
 ## Documentation (phpDoc)

@@ -5,6 +5,15 @@
 		"nette/tester": "^2.5"
 	},
 	"scripts": {
-		"tester": "vendor/bin/tester tests -s"
+		"tester": [
+			"vendor/bin/tester tests -s",
+			"@validate-plugins"
+		],
+		"validate-plugins": [
+			"claude plugin validate plugins/nette",
+			"claude plugin validate plugins/nette-lint",
+			"claude plugin validate plugins/nette-dev",
+			"claude plugin validate plugins/php-fixer"
+		]
 	}
 }

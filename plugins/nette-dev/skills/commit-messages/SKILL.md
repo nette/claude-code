@@ -1,6 +1,7 @@
 ---
 name: commit-messages
-description: Invoke BEFORE committing changes. Provides commit message conventions: lowercase, past tense, subject:description format. Use this skill whenever the user commits, creates commit messages, stages changes, uses /commit, tags releases, or discusses commit style - even for simple one-liner commits.
+description: >-
+  Invoke BEFORE committing changes. Provides commit message conventions: lowercase, past tense, subject:description format. Use this skill whenever the user commits, creates commit messages, stages changes, uses /commit, tags releases, or discusses commit style - even for simple one-liner commits.
 ---
 
 ## Commit Message Style
