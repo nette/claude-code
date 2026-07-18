@@ -1,6 +1,6 @@
 ---
 name: php-coding-standards
-description: Invoke BEFORE writing or modifying any PHP code. Provides coding standards and naming conventions for Nette repos: TABs, single quotes, strict_types, PSR-12 modifications, use statement ordering. Use this whenever creating, modifying, or refactoring any PHP code - even small bug fixes or one-line changes.
+description: 'Invoke BEFORE writing or modifying any PHP code. Provides coding standards and naming conventions for Nette repos: TABs, single quotes, strict_types, PSR-12 modifications, use statement ordering. Use this whenever creating, modifying, or refactoring any PHP code - even small bug fixes or one-line changes.'
 ---
 
 ## PHP Coding Standards

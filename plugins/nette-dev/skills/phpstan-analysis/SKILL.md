@@ -33,6 +33,7 @@ Installed by all Nette libraries. Transparently narrows types and silences false
 
 - **Nette helpers**: `Strings::match()`, `Arrays::invoke()`, `Helpers::falseToNull()`, `Expect::array()`, `Html` magic methods (`setXxx`/`getXxx`/`addXxx`), `Container::getComponent()` and `$this['name']`, Form `$form['name']`
 - **Native PHP functions**: `|false` / `|null` removed where unrealistic (`getcwd`, `json_encode`, `preg_*`, intl/GD/DOM/etc.)
+  - For `preg_*` with the `u` modifier, `false` can genuinely occur on invalid UTF-8 input, yet it is stripped **by design** — a regex call site should not double as input validation. So a dead `=== false` check after `preg_*` (`identical.alwaysFalse`) is not a bug in the extension: refactor to an explicit up-front `preg_match('##u', $s)` validation, the one form where `false` is preserved.
 - **After `Tester\Assert`**: `notNull()`, `type()`, `true()`, etc. narrow the type
 - **Silenced false positives**: arrow fns passed to `test()` / `Assert::exception()`, runtime variadic-closure type validation, Form event-handler callbacks with narrow data parameter
 
