@@ -6,7 +6,6 @@
 
 $input = json_decode(file_get_contents('php://stdin'));
 $filePath = $input->tool_input->file_path ?? '';
-$cwd = $input->cwd ?? '';
 
 // Skip if not a NEON file
 if (pathinfo($filePath, PATHINFO_EXTENSION) !== 'neon' || !file_exists($filePath)) {
@@ -19,14 +18,13 @@ if (isExcluded($filePath, 'lint-neon')) {
 	exit(0);
 }
 
-// Use project's neon-lint if exists, otherwise skip
-$neonLint = $cwd . '/vendor/bin/neon-lint';
-if (PHP_OS_FAMILY === 'Windows') {
-	$neonLint .= '.bat';
-}
-if (!file_exists($neonLint)) {
+// Find project's neon-lint upwards from the edited file, otherwise skip
+$suffix = PHP_OS_FAMILY === 'Windows' ? '.bat' : '';
+$dir = findUpwards($filePath, fn($dir) => is_file($dir . '/vendor/bin/neon-lint' . $suffix));
+if ($dir === null) {
 	exit(0);
 }
+$neonLint = $dir . '/vendor/bin/neon-lint' . $suffix;
 
 // Run neon-lint
 exec(escapeshellarg($neonLint) . ' ' . escapeshellarg($filePath) . ' 2>&1', $output, $exitCode);

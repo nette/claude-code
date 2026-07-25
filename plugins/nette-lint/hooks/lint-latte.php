@@ -2,12 +2,11 @@
 
 /**
  * PostToolUse hook: Validate Latte templates after editing
- * Only runs if project has custom latte-lint script in root
+ * Only runs if project has custom latte-lint script (searched upwards from the edited file)
  */
 
 $input = json_decode(file_get_contents('php://stdin'));
 $filePath = $input->tool_input->file_path ?? '';
-$cwd = $input->cwd ?? '';
 
 // Skip if not a Latte file
 if (pathinfo($filePath, PATHINFO_EXTENSION) !== 'latte' || !file_exists($filePath)) {
@@ -20,17 +19,23 @@ if (isExcluded($filePath, 'lint-latte')) {
 	exit(0);
 }
 
-// Use project's custom latte-lint if exists, otherwise skip
-$latteLint = $cwd . '/latte-lint';
-if (PHP_OS_FAMILY === 'Windows') {
-	$latteLint .= '.bat';
-}
-if (!file_exists($latteLint)) {
+// Find project's custom latte-lint upwards from the edited file, otherwise skip.
+// On Windows a .bat wrapper wins; the plain script is a PHP file run via PHP_BINARY.
+$dir = findUpwards($filePath, fn($dir) => is_file($dir . '/latte-lint')
+	|| (PHP_OS_FAMILY === 'Windows' && is_file($dir . '/latte-lint.bat')));
+if ($dir === null) {
 	exit(0);
+}
+if (PHP_OS_FAMILY === 'Windows') {
+	$command = is_file($dir . '/latte-lint.bat')
+		? escapeshellarg($dir . '/latte-lint.bat')
+		: escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($dir . '/latte-lint');
+} else {
+	$command = escapeshellarg($dir . '/latte-lint');
 }
 
 // Run latte-lint
-exec(escapeshellarg($latteLint) . ' ' . escapeshellarg($filePath) . ' 2>&1', $output, $exitCode);
+exec($command . ' ' . escapeshellarg($filePath) . ' 2>&1', $output, $exitCode);
 
 if ($exitCode === 0) {
 	exit(0);

@@ -2,12 +2,11 @@
 
 /**
  * PostToolUse hook: Run ESLint auto-fix after editing JavaScript/TypeScript files
- * Only runs if project has ESLint configured (eslint.config.* exists)
+ * Only runs if project has ESLint configured (config searched upwards from the edited file)
  */
 
 $input = json_decode(file_get_contents('php://stdin'));
 $filePath = $input->tool_input->file_path ?? '';
-$cwd = $input->cwd ?? '';
 
 // Skip if not a JS/TS file
 if (!preg_match('~\.(js|ts|mjs|mts)$~', $filePath) || !file_exists($filePath)) {
@@ -20,16 +19,17 @@ if (isExcluded($filePath, 'lint-js')) {
 	exit(0);
 }
 
-// Skip if no ESLint config in project
-if (
-	!glob($cwd . '/eslint.config.*')
-	&& !file_exists($cwd . '/.eslintrc.js')
-	&& !file_exists($cwd . '/.eslintrc.json')
-) {
+// Find ESLint config upwards from the edited file, otherwise skip
+$dir = findUpwards($filePath, fn($dir) => glob($dir . '/eslint.config.*')
+	|| file_exists($dir . '/.eslintrc.js')
+	|| file_exists($dir . '/.eslintrc.json'));
+if ($dir === null) {
 	exit(0);
 }
 
-// Run ESLint fix directly on the file
+// Run ESLint fix directly on the file, from the config directory
+// (flat config and local node_modules resolve relative to cwd)
+chdir($dir);
 exec('npx eslint --fix ' . escapeshellarg($filePath) . ' 2>&1', $output, $exitCode);
 
 if ($exitCode === 0) {

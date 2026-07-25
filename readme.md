@@ -69,6 +69,8 @@ Validates files after every edit and reports errors straight back to Claude:
 | **lint-json** | JSON/JSONC syntax via the bundled `seld/jsonlint` (reports the exact line; comments and trailing commas are tolerated in `.jsonc`, `tsconfig.json`, `.vscode/*.json`) |
 | **lint-js** | ESLint `--fix` on `.js/.ts/.mjs/.mts` (only if the project has an ESLint config) |
 
+Project tools and configs (`latte-lint`, `vendor/bin/neon-lint`, ESLint config) are searched upwards from the edited file, so monorepos where the session runs above the app directory work too. The search stops one level above the nearest `.git` root.
+
 ### `nette-dev` – For Framework Contributors
 
 Coding standards and conventions for contributing to the Nette Framework itself.

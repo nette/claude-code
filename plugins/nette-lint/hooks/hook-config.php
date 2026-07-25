@@ -2,11 +2,39 @@
 
 /**
  * Helper for this plugin's PostToolUse hooks: reads the project's
- * .nette-claude.json and decides whether a given hook should skip a file.
+ * .nette-claude.json and decides whether a given hook should skip a file,
+ * and locates project tools/configs upwards from the edited file.
  *
  * Plugins install independently (each into its own cache directory), so this
  * file is duplicated in every plugin's hooks/ folder - keep the copies in sync.
  */
+
+
+/**
+ * Walks from the edited file's directory upwards and returns the first directory
+ * where $check succeeds. Handles monorepos where the session runs above the app
+ * directory. Stops one level above the nearest .git root (or at the filesystem
+ * root), so unrelated tools/configs further up are never picked up.
+ */
+function findUpwards(string $filePath, callable $check): ?string
+{
+	$dir = str_replace('\\', '/', dirname($filePath));
+	$aboveGitRoot = false;
+	while (true) {
+		if ($check($dir)) {
+			return $dir;
+		}
+		if ($aboveGitRoot) {
+			return null;
+		}
+		$aboveGitRoot = file_exists($dir . '/.git'); // directory or file (worktree, submodule)
+		$parent = dirname($dir);
+		if ($parent === $dir) {
+			return null;
+		}
+		$dir = $parent;
+	}
+}
 
 
 /**
