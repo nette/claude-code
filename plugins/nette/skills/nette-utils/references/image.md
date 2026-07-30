@@ -65,7 +65,7 @@ $type = Image::detectTypeFromFile('photo.jpg');
 $type = Image::detectTypeFromString($data);
 
 // Convert
-Image::typeToExtension(ImageType::JPEG); // 'jpg'
+Image::typeToExtension(ImageType::JPEG); // 'jpeg' (not 'jpg')
 Image::typeToMimeType(ImageType::JPEG);  // 'image/jpeg'
 Image::extensionToType('jpg');           // ImageType::JPEG
 ```

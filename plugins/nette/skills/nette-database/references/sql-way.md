@@ -253,8 +253,9 @@ $database->onQuery[] = function ($database, $result) use ($logger) {
 $database->beginTransaction();
 
 try {
-	$database->query('UPDATE accounts SET balance -= ? WHERE id = ?', 100, 1);
-	$database->query('UPDATE accounts SET balance += ? WHERE id = ?', 100, 2);
+	// `+=` / `-=` are key suffixes for the ?set modifier, NOT inline SQL operators
+	$database->query('UPDATE accounts SET ? WHERE id = ?', ['balance-=' => 100], 1);
+	$database->query('UPDATE accounts SET ? WHERE id = ?', ['balance+=' => 100], 2);
 	$database->commit();
 } catch (\Exception $e) {
 	$database->rollBack();

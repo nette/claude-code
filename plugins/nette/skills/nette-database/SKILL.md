@@ -287,6 +287,6 @@ services:
 
 For detailed information, use WebFetch on these URLs:
 
-- [Database Core](https://doc.nette.org/en/database/core) – SQL queries and Connection API
+- [SQL way](https://doc.nette.org/en/database/sql-way) – SQL queries and Connection API
 - [Database Explorer](https://doc.nette.org/en/database/explorer) – Selection/ActiveRow API
 - [Database Configuration](https://doc.nette.org/en/database/configuration) – connection setup

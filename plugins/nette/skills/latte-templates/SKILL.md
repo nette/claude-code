@@ -296,7 +296,7 @@ The standard way is assigning to `$this->template`:
 $this->template->article = $this->articles->getById($id);
 ```
 
-For properties that should always be available in templates, use the `#[TemplateVariable]` attribute (requires public or protected visibility) instead of repeating assignments in every action:
+For properties that should always be available in templates, use the `#[TemplateVariable]` attribute (the property **must be public** – on a protected one it throws `LogicException`) instead of repeating assignments in every action:
 
 ```php
 use Nette\Application\Attributes\TemplateVariable;

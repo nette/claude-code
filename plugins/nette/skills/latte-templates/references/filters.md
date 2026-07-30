@@ -4,7 +4,9 @@
 
 ```latte
 {$var|filter}                     {* basic *}
-{$var|filter:arg1:arg2}           {* with arguments *}
+{$var|filter:arg1,arg2}           {* with arguments – ONLY the first one may follow
+                                     the colon, the rest are comma-separated.
+                                     `filter:arg1:arg2` is a CompileException. *}
 {$var|filter1|filter2}            {* chained *}
 {$var?|filter}                    {* nullsafe - skips if null *}
 {($expr)|filter}                  {* on expression *}
@@ -16,15 +18,15 @@
 | Filter | Description | Example |
 |--------|-------------|---------|
 | `truncate:length` | Shorten preserving words | `{$text\|truncate:100}` |
-| `substr:start:length` | Extract substring | `{$s\|substr:0:10}` |
+| `substr:start,length` | Extract substring | `{$s\|substr:0,10}` |
 | `trim` | Strip whitespace | `{$s\|trim}` |
 | `strip` / `spaceless` | Remove extra whitespace | `{$html\|spaceless}` |
 | `stripHtml` | Remove HTML tags | `{$html\|stripHtml}` |
 | `indent:level` | Indent text | `{$code\|indent:2}` |
-| `replace:search:replace` | Replace string | `{$s\|replace:'foo':'bar'}` |
-| `replaceRE:pattern:replace` | Regex replace | `{$s\|replaceRE:'/\\d+/':'X'}` |
-| `padLeft:length:char` | Pad from left | `{$n\|padLeft:5:'0'}` |
-| `padRight:length:char` | Pad from right | `{$s\|padRight:20}` |
+| `replace:search,replace` | Replace string | `{$s\|replace:'foo','bar'}` |
+| `replaceRE:pattern,replace` | Regex replace | `{$s\|replaceRE:'/\\d+/','X'}` |
+| `padLeft:length,char` | Pad from left | `{$n\|padLeft:5,'0'}` |
+| `padRight:length,char` | Pad from right | `{$s\|padRight:20}` |
 | `repeat:times` | Repeat string | `{$s\|repeat:3}` |
 | `reverse` | Reverse string/array | `{$s\|reverse}` |
 | `webalize` | URL-safe slug | `{$title\|webalize}` |
@@ -44,11 +46,11 @@
 | Filter | Description | Example |
 |--------|-------------|---------|
 | `number:decimals` | Format number | `{$n\|number:2}` → `1,234.56` |
-| `number:format` | ICU format | `{$n\|number:'#,##0.00'}` |
+| `number:pattern` | ICU pattern, **needs a locale** | `{$n\|number:'#,##0.00'}` |
 | `round:precision` | Round | `{$n\|round:1}` |
 | `floor:precision` | Round down | `{$n\|floor}` |
 | `ceil:precision` | Round up | `{$n\|ceil}` |
-| `clamp:min:max` | Clamp to range | `{$n\|clamp:0:100}` |
+| `clamp:min,max` | Clamp to range | `{$n\|clamp:0,100}` |
 | `bytes` | Format file size | `{$size\|bytes}` → `1.5 MB` |
 
 ## Date & Time
@@ -61,8 +63,19 @@
 ```latte
 {$date|date:'j. n. Y'}           {* 15. 4. 2024 *}
 {$date|date:'H:i'}               {* 14:30 *}
-{$date|localDate: date: short}   {* locale-dependent *}
+{$date|localDate: date: short}   {* locale-dependent, see below *}
 ```
+
+**`localDate` and the ICU-pattern form of `number` throw `Latte\RuntimeException` unless a
+locale is set** – the default is `null` and `ext-intl` is required. In a Nette application
+set it in the config:
+
+```neon
+latte:
+	locale: cs_CZ
+```
+
+`|date` and the decimals form `|number:2` work without a locale.
 
 ## Arrays
 
@@ -72,7 +85,7 @@
 | `last` | Last element | `{$arr\|last}` |
 | `random` | Random element | `{$arr\|random}` |
 | `length` | Count elements | `{$arr\|length}` |
-| `slice:start:length` | Extract slice | `{$arr\|slice:0:5}` |
+| `slice:start,length` | Extract slice | `{$arr\|slice:0,5}` |
 | `limit:length` | Limit array/string/iterator | `{$arr\|limit:5}` |
 | `sort` | Sort array | `{$arr\|sort}` |
 | `sort:by:key` | Sort by key | `{$arr\|sort: by: name}` |

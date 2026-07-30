@@ -161,7 +161,8 @@ Expect::string()
 // Transform with validation
 Expect::string()->transform(function ($s, $context) {
 	if (!ctype_alpha($s)) {
-		$context->addError('Must be letters only');
+		// $code is REQUIRED – a single-argument call is an ArgumentCountError
+		$context->addError('Must be letters only', Nette\Schema\Message::FailedAssertion);
 		return null;
 	}
 	return strtoupper($s);
@@ -295,9 +296,14 @@ $createUserSchema = Expect::structure([
 	'password' => Expect::string()->required()->min(8),
 	'roles' => Expect::listOf(
 		Expect::anyOf('user', 'admin', 'moderator')
-	)->default(['user']),
+	)->default(['user'])->mergeDefaults(false),
 ])->castTo('array');
 ```
+
+**Defaults of arrays and lists are MERGED into the input, not replaced.** Without
+`mergeDefaults(false)` above, a client sending `['admin']` ends up with
+`['user', 'admin']` – the default silently survives. That is harmless for config
+(where merging is the point) and a privilege bug for API input.
 
 ### Online Documentation
 

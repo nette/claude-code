@@ -65,7 +65,7 @@ parameters:
 				custom: App\MyMapper       # custom mapper FQCN
 ```
 
-Full reference: https://doc.nette.org/en/best-practices/phpstan-rules
+Full reference: https://doc.nette.org/en/tools/phpstan-rules
 
 ---
 

@@ -15,7 +15,7 @@ Place files in `www/assets/` and use in templates:
 ```latte
 {asset 'logo.png'}           {* <img src="..." width="..." height="..."> *}
 {asset 'style.css'}          {* <link rel="stylesheet" href="..."> *}
-{asset 'app.js'}             {* <script src="..." type="module"></script> *}
+{asset 'app.js'}             {* <script src="..."></script> *}
 ```
 
 ## Latte Tags
@@ -29,11 +29,24 @@ Renders complete HTML element:
 {* <img src="/assets/hero.jpg?v=123" width="1920" height="1080"> *}
 
 {asset 'app.js'}
-{* <script src="/assets/app.js?v=456" type="module"></script> *}
+{* <script src="/assets/app.js?v=456"></script> *}
 
 {asset 'style.css'}
 {* <link rel="stylesheet" href="/assets/style.css?v=789"> *}
 ```
+
+**`type="module"` is NOT added for ordinary files.** Only a Vite entry point renders as
+`<script src="..." type="module">`. A file served through the filesystem mapper gets a
+plain `<script>`, so `import` in it fails with *Cannot use import statement outside a
+module*. To force it, write the attribute on the tag yourself – attributes you author win
+over the generated ones:
+
+```latte
+<script type="module" n:asset="app.js"></script>
+```
+
+The only option `{asset}` accepts for a filesystem asset is `version`; anything else
+throws. So `{asset 'app.js', type: module}` does **not** work.
 
 Inside attributes, outputs URL only:
 

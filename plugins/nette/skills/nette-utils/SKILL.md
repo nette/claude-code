@@ -63,7 +63,7 @@ $json = Json::encode($data, forceObjects: true);  // arrays as objects
 
 // Decode
 $data = Json::decode($json);                    // returns stdClass
-$data = Json::decode($json, forceArray: true);  // returns array
+$data = Json::decode($json, forceArrays: true); // returns array (note the plural)
 
 // Both throw Nette\Utils\JsonException on error
 ```
@@ -242,16 +242,20 @@ Working with PHP callables.
 ```php
 use Nette\Utils\Callback;
 
-// Normalize to closure
-$closure = Callback::closure($callable);
-$closure = Callback::closure($obj, 'method');
-$closure = Callback::closure('Class::method');
+// Normalize to closure – use PHP itself, there is no Callback::closure() in Utils 4
+$closure = $callable(...);
+$closure = $obj->method(...);
 
 // Check validity
 Callback::check($callable);  // throws if invalid
 
-// Invoke with exception wrapping
-Callback::invokeSafe($callable, $args, $onError);
+// Invoke a native function and turn its warnings into an exception.
+// First argument is a function NAME, not a callable; the handler gets (string $message, int $severity).
+Callback::invokeSafe(
+	'preg_match',
+	[$pattern, $subject],
+	fn(string $message) => throw new \RuntimeException($message),
+);
 
 // Reflection
 $reflection = Callback::toReflection($callable);
@@ -278,8 +282,8 @@ $type->getSingleName();     // 'int' or null if union
 $type->getNames();          // ['int', 'string', 'null']
 $type->isUnion();           // true
 $type->isIntersection();    // false
-$type->isBuiltin();         // true
-$type->allowsNull();        // true
+$type->isBuiltin();         // false – only true for a SINGLE built-in type
+$type->allows('null');      // true – there is no allowsNull() method
 $type->isClass();           // false
 ```
 
@@ -287,11 +291,19 @@ $type->isClass();           // false
 
 ## SmartObject Trait
 
-Modern PHP object features for classes.
+Getter/setter property access for classes. Its historical jobs are done by PHP itself now;
+for new code prefer PHP 8.4 property hooks. The trait is still useful for exposing
+getters as read-only properties.
+
+**The `@property` annotation is mandatory** – without it the magic access throws
+`MemberAccessException`, because the trait only maps properties declared in the docblock.
 
 ```php
 use Nette\SmartObject;
 
+/**
+ * @property string $name
+ */
 class MyClass
 {
 	use SmartObject;

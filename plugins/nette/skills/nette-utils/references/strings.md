@@ -16,7 +16,7 @@ Requires PHP `mbstring` extension.
 Strings::lower('Hello World');      // 'hello world'
 Strings::upper('Hello World');      // 'HELLO WORLD'
 Strings::firstUpper('hello world'); // 'Hello world'
-Strings::firstLower('Hello World'); // 'hello world'
+Strings::firstLower('Hello World'); // 'hello World' – only the first character changes
 Strings::capitalize('hello world'); // 'Hello World'
 ```
 
@@ -148,12 +148,12 @@ Strings::compare('Nette', 'next', 2);   // true (first 2 chars)
 Strings::compare('Nette', 'Latte', -2); // true (last 2 chars)
 ```
 
-### findPrefix(...$strings): string
+### findPrefix(array $strings): string
 
-Finds common prefix.
+Finds common prefix. Takes a single array – passing the strings as separate arguments is a TypeError.
 
 ```php
-Strings::findPrefix('prefix-a', 'prefix-bb', 'prefix-c'); // 'prefix-'
+Strings::findPrefix(['prefix-a', 'prefix-bb', 'prefix-c']); // 'prefix-'
 ```
 
 ---
