@@ -161,6 +161,32 @@ public function getProductsInCategory(int $categoryId): Selection
 ->where('category.parent.name', 'Root Category')
 ```
 
+### Traps in where() and SQL Fragments
+
+**The array KEY is SQL, the value is a bound parameter.** `where()` splits the key on the first
+space into a column and an operator and emits both into the query, so a key built from user
+input is an injection hole – and mass-assigning a request array into `where()` or `insert()`
+lets the client choose columns and operators:
+
+```php
+$db->table('user')->where(['id >' => 5]);        // fine: key is yours, value is bound
+$db->table('user')->where($_GET['filter']);      // NEVER: keys come from the client
+```
+
+**Write SQL keywords in UPPERCASE inside fragments.** Explorer quotes lowercase words as
+identifiers, so `where('name like ?', $x)` compiles to `` `name` `like` ? `` and fails; uppercase
+words are left alone:
+
+```php
+->where('name LIKE ?', "%$q%")      // correct
+->where('name like ?', "%$q%")      // `like` gets quoted as a column name
+```
+
+**An empty array flips the meaning of a condition.** `where('id', [])` becomes
+`IS NULL AND FALSE` (matches nothing), while `where('id NOT', [])` becomes `IS NULL OR TRUE`
+(matches **everything**). Guard empty filter lists explicitly. Mixing operators without
+parentheses raises `Possible SQL query corruption. Add parentheses around operators.`
+
 ### Fetching Strategies by Use Case
 
 **Single optional result:** `->fetch()`
@@ -204,7 +230,12 @@ $this->db->transaction(function () use ($data, $items) {
 });
 ```
 
-The callback approach automatically commits on success and rolls back on exception.
+The callback approach automatically commits on success and rolls back on exception, and it
+**returns whatever the callback returns**, so you can produce a value out of it.
+
+Nested `transaction()` calls are counted, and only the outermost one actually commits. Calling
+`beginTransaction()`, `commit()` or `rollBack()` manually inside the callback throws
+`LogicException` – pick one style per code path and stay with it.
 
 ### Anti-Patterns to Avoid
 

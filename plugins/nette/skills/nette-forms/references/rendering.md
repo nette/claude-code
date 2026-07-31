@@ -21,7 +21,7 @@ Render entire form with default renderer:
 With attributes:
 
 ```latte
-{form signInForm class => 'ajax', id => 'frm-signin'}
+{form signInForm, class => 'ajax', id => 'frm-signin'}
 ```
 
 ### Labels and Inputs
@@ -103,7 +103,7 @@ The `$form` variable is automatically available inside `{form}...{/form}` tags.
 ### Horizontal Form
 
 ```latte
-{form signInForm class => 'row g-3'}
+{form signInForm, class => 'row g-3'}
 <div class="col-md-6">
 	{label username class => 'form-label' /}
 	{input username class => 'form-control'}
@@ -150,14 +150,14 @@ $renderer->wrappers['control']['container'] = 'div class="col-sm-9"';
 | Wrapper | Description |
 |---------|-------------|
 | `form.container` | Form element wrapper |
-| `form.errors` | Form errors container |
+| `error.container` / `error.item` | Form-level errors (list and item) |
 | `group.container` | Control group wrapper |
 | `group.label` | Group label |
 | `controls.container` | All controls wrapper |
 | `pair.container` | Label + control pair |
 | `control.container` | Single control wrapper |
 | `control.description` | Control description |
-| `control.errors` | Control errors |
+| `control.errorcontainer` / `control.erroritem` | Errors of a single control |
 | `label.container` | Label wrapper |
 | `label.suffix` | After label text |
 | `label.requiredsuffix` | Required field indicator |
@@ -244,7 +244,7 @@ Or translate in template:
 Add ajax class for Naja:
 
 ```latte
-{form searchForm class => ajax}
+{form searchForm, class => ajax}
 	{input query}
 	{input send}
 {/form}

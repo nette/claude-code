@@ -134,6 +134,50 @@ search:
 			- *Service
 ```
 
+### Generated Factories and Accessors
+
+Instead of injecting the container or writing factory boilerplate, declare an interface and let
+DI generate the implementation. The interface must have **exactly one method named `create`
+with a declared return type**:
+
+```php
+interface ArticleFactory
+{
+	function create(int $authorId): Article;
+}
+```
+
+```neon
+services:
+	- ArticleFactory        # short form: implement: is inferred from the interface
+```
+
+Parameters of `create()` are matched to the constructor **by name**, so `$authorId` above lands
+in `Article::__construct(int $authorId)`. The long form adds fixed arguments or setup:
+
+```neon
+services:
+	articleFactory:
+		implement: ArticleFactory
+		arguments:
+			authorId: 123        # create() does not take it, the constructor does
+		setup:
+			- setAuthorId($authorId)   # create() takes it, a setter consumes it
+```
+
+An **accessor** is the lazy variant – one `get()` method returning an existing service, so the
+service is only created on first `get()`:
+
+```php
+interface DatabaseAccessor
+{
+	function get(): Database;
+}
+```
+
+This is the mechanism behind component factories in presenters, so use it instead of passing
+the container around.
+
 ### Decorator Section
 
 Apply configuration to all services of a specific type without listing them individually. Useful for injecting common dependencies or calling setup methods on multiple services:
@@ -240,7 +284,7 @@ security:
 
 **Don't name services unnecessarily** – named services create coupling; when you rename the class, you must also update every `@name` reference. Only name when you need `@serviceName` references.
 
-**Don't register every class** – only register classes that need injection or are injected elsewhere. Presenters and components are registered automatically.
+**Don't register every class** – only register classes that need injection or are injected elsewhere. Presenters are registered automatically (Nette scans them by `IPresenter`); components and their factory interfaces are **not** and must be registered explicitly.
 
 **Don't hardcode secrets** – use parameters and load them from environment-specific config files (env.local.neon) that are gitignored.
 

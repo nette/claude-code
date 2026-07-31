@@ -43,7 +43,7 @@ $form->addPassword('password', 'Password:')
 | `Pattern` | Matches regex | `string` |
 | `PatternInsensitive` | Case-insensitive regex | `string` |
 | `Integer` | Integer value | - |
-| `Numeric` | Alias for Integer | - |
+| `Numeric` | Non-negative integer, digits only (not an alias for `Integer`) | - |
 | `Float` | Decimal number | - |
 | `Min` | Minimum value | `int\|float` |
 | `Max` | Maximum value | `int\|float` |
@@ -152,17 +152,22 @@ $form->addInteger('number')
 
 ## onValidate Event
 
-Additional validation after rules pass:
+Cross-field validation, typically checking a combination of several controls. It fires after
+the individual rules have run, but **also when some of them failed**, so the values are not
+guaranteed to be valid. Read them with `getUntrustedValues()`:
 
 ```php
 $form->onValidate[] = function (Form $form): void
 {
-	$data = $form->getValues();
+	$data = $form->getUntrustedValues();
 	if ($data->password === $data->username) {
 		$form->addError('Password cannot be same as username.');
 	}
 };
 ```
+
+`getValues()` inside `onValidate` triggers `E_USER_WARNING` on an invalid form, and on a
+**container's** `onValidate` it throws `InvalidStateException` outright.
 
 ## Error Messages
 

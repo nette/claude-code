@@ -7,18 +7,9 @@ description: Invoke BEFORE running PHPStan or fixing PHPStan errors. Covers erro
 
 ### Running PHPStan
 
-```bash
-# Run with project configuration
-vendor/bin/phpstan analyse
-
-# Run on specific paths
-vendor/bin/phpstan analyse src/foo/ src/bar.php
-
-# Generate baseline for legacy projects
-vendor/bin/phpstan analyse --generate-baseline
-```
-
 Never use `--error-format=json` - its output format can change between PHPStan versions and is not designed for stable machine consumption. For machine-readable output, use `--error-format=raw`.
+
+**Take the verdict from the exit code, never from grepping the output.** A filter defines what you see, so anything it misses reads as success - and some findings (an unmatched `ignoreErrors` pattern, for one) are not tied to any file and carry no file prefix at all.
 
 ### Target Levels
 
@@ -29,7 +20,24 @@ Target level for Nette libraries is **8**. Levels higher than 8 are not worth pu
 
 ### nette/phpstan-rules
 
-Installed by all Nette libraries. Transparently narrows types and silences false positives — many PHPStan errors disappear without manual fixes. Don't add asserts, casts, or `@var` for errors that fall into these categories:
+Installed by all Nette libraries. It works in both directions, and mixing them up is a real
+hazard:
+
+- **It narrows types and silences false positives** — many PHPStan errors disappear without
+  manual fixes. Don't fight those (list below).
+- **It also REPORTS errors of its own and turns on stricter reporting.** Two rules of its own:
+  `nette.abortException` (an `AbortException` caught and not rethrown — the fix is to rethrow it
+  in its own `catch`, which is not guessable) and `nette.strings.regexpPattern` (an invalid
+  regular expression). On top of that `extension.neon` forces nine flags on, including
+  `checkMissingCallableSignature`, `reportMaybesInMethodSignatures` and
+  `reportAlwaysTrueInLastCondition` — so some errors exist **only because** this extension is
+  installed. Those are genuine findings; never silence them.
+
+It also registers `universalObjectCratesClasses` for `DefaultTemplate`, `Database\Row`,
+`SessionSection`, `SimpleIdentity` and `Html`, so the most common `property.notFound` in a Nette
+app is already solved — don't add `@property` annotations for those.
+
+Don't add asserts, casts, or `@var` for errors that fall into these categories:
 
 - **Nette helpers**: `Strings::match()`, `Arrays::invoke()`, `Helpers::falseToNull()`, `Expect::array()`, `Html` magic methods (`setXxx`/`getXxx`/`addXxx`), `Container::getComponent()` and `$this['name']`, Form `$form['name']`
 - **Native PHP functions**: `|false` / `|null` removed where unrealistic (`getcwd`, `json_encode`, `preg_*`, intl/GD/DOM/etc.)
@@ -152,33 +160,6 @@ When PHPStan reports a missing callable signature (`missingType.callable`), it's
 Bare `callable` is PHPStan's top type for callables — it accepts anything invokable regardless of signature, and `$cb(...$args)` inside the function still type-checks. So for "invoke arbitrary user callbacks" APIs keep `callable` (e.g. `@param iterable<callable> $callbacks`) and, if `missingType.callable` fires, ignore it for that file in `phpstan.neon` with a comment. An explicit signature buys nothing and introduces false positives. (Confirmed in nette/utils `Arrays::invoke()`.)
 
 The same applies to bare **`\Closure`** — when the value is guaranteed to be a closure (stored property, result of `Closure::fromCallable()`, etc.) but its signature is unknown or intentionally polymorphic, use plain `\Closure` without parameters. `missingType.callable` then fires on it too and is ignored on the same grounds.
-
-**Readability tip — wrap typed callables in parentheses.** When a callable/Closure type has a signature *and* appears in a union or alongside other type fragments, wrap it in `(...)` so the reader can see where the signature ends:
-
-```php
-// Hard to parse — does |null belong to the return type, or to the whole callable?
-/** @var callable(): void|null $cb */
-
-// Clear — the callable is one alternative, null is the other
-/** @var (callable(): void)|null $cb */
-
-// Same for Closure
-/** @var (\Closure(int): string)|null $cb */
-```
-
-The parentheses are purely cosmetic for PHPStan (it parses both forms identically), but they save the reader from re-reading the line.
-
-### Beware of `?:` operator with falsy values
-
-The `?:` operator treats `0`, `0.0`, `'0'`, `''`, `[]`, `null`, and `false` as falsy. This is dangerous when the value can legitimately be `'0'` or `0`:
-
-```php
-// BUG - returns $default when $value is '0' or 0
-$result = $value ?: $default;
-
-// Correct - only replaces null
-$result = $value ?? $default;
-```
 
 ---
 

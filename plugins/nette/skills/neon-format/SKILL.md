@@ -164,7 +164,8 @@ services:
 ### Key Rules
 
 - Space after `:` is required (`key: value`, not `key:value`)
-- Use **tabs** for indentation (not spaces – unlike YAML)
+- Use **tabs** for indentation. Spaces are valid too (`Neon::encode()` just defaults to tabs);
+  unlike YAML, NEON accepts either, so never "fix" space-indented NEON
 - Block notation cannot be nested inside inline notation
 - Unquoted strings cannot start/end with spaces or look like numbers/booleans/dates
 

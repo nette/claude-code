@@ -5,7 +5,15 @@ description: Use this skill whenever writing, modifying, or running .phpt test f
 
 ## Testing with Nette Tester
 
-Nette Tester is a testing framework for PHP. Test files use the `.phpt` extension.
+Nette Tester is a testing framework for PHP. Test files use the `.phpt` extension by convention;
+the runner also collects `*Test.php`.
+
+Two failure modes worth knowing before writing a single test:
+
+- **A test that executes no assertion is an error** – `Error: This test forgets to execute an
+  assertion.` (exit code 178). It is on by default via `Environment::setup()`.
+- **`exit()` / `die()` in a test ends it with code 0, i.e. as a PASS.** Use `Assert::fail()` to
+  fail deliberately.
 
 ```shell
 composer require nette/tester --dev
@@ -54,6 +62,56 @@ Key points:
 - Do not add comments before `test()` calls - the description parameter serves this purpose
 - Group related tests in the same file
 - Test file naming: `{ClassName}.phpt` or `{ClassName}.{feature}.phpt`
+
+### Test Annotations
+
+In the **first docblock** of the test file, before `require`. Case-insensitive; no effect when the file is run as plain `php test.phpt`. The first non-`@` line is the test title (written `TEST: ...`).
+
+| Annotation | Syntax | Notes |
+|---|---|---|
+| `@skip` | – | always skipped |
+| `@phpVersion` | `[op] version` | op: `<= < == = != <> >= >`, default `>=` |
+| `@phpExtension` | `pdo, pdo_mysql` | comma/space separated; repeatable |
+| `@dataProvider` | `file.ini[, query]` | path relative to the test file; a `.php` file returning array/Traversable works too |
+| `@dataProvider?` | `? file.ini` | leading `?` = skip (not fail) when the file is missing |
+| `@multiple` | `N` | runs the file exactly N times |
+| `@testCase` | – | file holds a `Tester\TestCase`; runner runs each method in its own process |
+| `@exitCode` | `N` | default 0 |
+| `@outputMatch` / `@outputMatchFile` | pattern / `file` | `Assert::match` / `matchFile` against stdout |
+| `@phpIni` | `key=value` | same as the runner's `-d key=value`; repeatable |
+
+**Trap — `@phpVersion` with an exact version.** The skip condition is `version_compare(annotation, actualPhpVersion, op)`, so equality skips. `@phpVersion 8.4.3` on PHP 8.4.3 is **skipped**; write two components (`@phpVersion 8.4`), which sorts below `8.4.0` and therefore runs. Verified empirically on PHP 8.5.4.
+
+In the `@dataProvider` file form the test loads its own data set: `$args = Tester\Environment::loadData();` — called once per run, returning one INI section. INI is parsed with `INI_SCANNER_TYPED` (values arrive typed). The optional query filters sections: its tokens are matched left to right against the whitespace-separated parts of the section name, operators `<= =< < == = != <> >= => >` (bare token = `=`), numeric tokens compared by `version_compare`. So `@dataProvider databases.ini postgresql, >=9.0` selects `[postgresql 9.1]`.
+
+### `Tester\TestCase`
+
+```php
+class RectangleTest extends Tester\TestCase
+{
+	protected function setUp() {}      // before each test method
+	protected function tearDown() {}   // after each test method
+	public function testArea() { Assert::same(6, (new Rect(2, 3))->area()); }
+}
+
+(new RectangleTest)->run();   // MANDATORY, last line of the file
+```
+
+- Discovery pattern is `#^test[A-Z0-9_]#`: `testArea`, `test_area`, `test2` are tests — **`testarea` silently is not**.
+- A `test*` method must be `public`; a protected one is discovered, then fails with `Method X is not public. Make it public or rename it.`
+- **Forgetting `->run()`**: with `@testCase` the runner reports `Cannot list TestCase methods in file '…'. Do you call TestCase::run() in it?`; without it the file merely defines a class and dies as `This test forgets to execute an assertion.` (exit 178).
+- Order per method: `setUp()`, test, `tearDown()`. If the test throws, `tearDown()` still runs but errors inside it are suppressed. A failure in `setUp()`/`tearDown()` fails the test.
+- In v2.6.1 `run()` aborts at the **first** failing method; `@testCase` sidesteps that by isolating each method.
+- `$this->skip('reason')` skips the current method from anywhere inside it.
+
+```php
+/** @throws RuntimeException  Wrong argument order */   // class + optional message pattern; once per method
+/** @dataProvider getArgs */      // value without a dot -> method of this class
+/** @dataProvider args.ini x>1 */ // value with a dot -> ini/php file relative to the test file + optional query
+public function testLoop($a, $b) {}
+```
+
+The provider returns an array/`Traversable` of arrays. String-keyed sets are merged over the method's parameter defaults; list-keyed sets are passed positionally. A method with required parameters and no `@dataProvider` throws `TestCaseException`.
 
 ### Assertions Overview
 
@@ -157,6 +215,19 @@ testException('throws exception for invalid input', function () {
 }, AssetNotFoundException::class, "Asset file 'missing.txt' not found at path: %a%");
 ```
 
+### `Assert::exception()` returns the exception
+
+```php
+public static function exception(callable $function, string $class, ?string $message = null, int|string|null $code = null): ?\Throwable
+```
+
+The 3rd argument is an `Assert::match` pattern, the 4th compares `getCode()` strictly. The caught exception is **returned**, so a previous/nested one can be asserted further. `Assert::throws()` is a plain alias.
+
+```php
+$e = Assert::exception(fn() => $obj->save(), DbException::class, 'Insert failed%a%', 1062);
+Assert::type(PDOException::class, $e->getPrevious());
+```
+
 ### setUp() for Shared Setup
 
 Use `setUp()` to run common initialization before each `test()` block:
@@ -179,24 +250,55 @@ test('each test gets fresh setup', function () use (&$db) {
 });
 ```
 
+### Helpers
+
+| Call | Purpose |
+|---|---|
+| `DomQuery::fromHtml($html)` / `::fromXml($xml)` | CSS querying; extends `SimpleXMLElement`, so text is `(string) $el`, attributes `$el['href']`. `find($sel): list<DomQuery>`, `has($sel)`, `matches($sel)` (2.5.3), `closest($sel)` (2.5.5, needs PHP 8.4) |
+| `FileMock::create(string $content = '', ?string $extension = null): string` | returns a `mock://N.ext` URL usable with `fopen`, `file_get_contents`, `parse_ini_file`, … |
+| `Helpers::purge(string $dir): void` | creates the dir, wipes its contents; throws on an empty string or a root path |
+| `Environment::lock(string $name, string $path): void` | serializes parallel tests; **the only sane fix for several tests hitting one database** |
+| `Environment::skip(string $message = ''): void` | skips the running test |
+| `Assert::with(object\|string $objectOrClass, Closure $fn): mixed` | runs `$fn` bound to the object so `$this` reaches private members (a class-string binds statically); returns the closure's value |
+
+`Environment::lock()`'s `$path` defaults to `''`, putting the lock file in the filesystem root — always pass a directory: `Tester\Environment::lock('database', __DIR__ . '/tmp')`.
+
+`Tester\Expect` builds partial constraints, honoured **only inside `Assert::equal()`**, never in `Assert::same()`:
+
+```php
+Assert::equal([
+	'id' => Expect::type('int'),
+	'name' => Expect::match('%a%ová')->andType('string'),
+	'tags' => Expect::count(3),
+], $row);
+```
+
+Static factories mirror the assertions (`same`, `notSame`, `equal`, `contains`, `true`, `null`, `nan`, `truthy`, `count`, `type`, `match`, `matchFile`, …); chain more with the `and*` prefix, or use `Expect::that(fn($v) => $v > 0)` for a callback (returning `false` fails).
+
+`Tester\HttpAssert` (since 2.5.6) drives real HTTP requests over cURL; `deny*` variants exist for all three:
+
+```php
+HttpAssert::fetch($url, method: 'POST', headers: [...], cookies: [...], follow: false, body: '{}')
+	->expectCode(201)->expectHeader('Content-Type', contains: 'json')->expectBody(matches: '%A%ok%A%');
+```
+
 ### Essential Commands
 
 ```bash
-# Run all tests with output
-vendor/bin/tester tests/ -s
-
-# Run tests in specific directory
-vendor/bin/tester tests/filters/ -s
-
-# Run in parallel (8 threads)
-vendor/bin/tester tests/ -j 8
-
-# Run specific test file directly
-php tests/common/Engine.phpt
-
-# Run with code coverage (requires Xdebug or PCOV)
+vendor/bin/tester tests/ -s                     # run everything, show skip reasons
+php tests/common/Engine.phpt                    # run one test directly, without the runner
 vendor/bin/tester tests/ --coverage coverage.html --coverage-src app/
 ```
+
+| Flag | Effect |
+|---|---|
+| `-s` | show why tests were skipped (otherwise skips are silent) |
+| `-j <num>` | parallel jobs, **default 8** — not 1 |
+| `--stop-on-fail` | stop at the first failure |
+| `-w \| --watch <path>` | after the run keep watching the path and re-run on change; repeatable |
+| `-o <format>[:<file>]` | `console`, `console-lines`, `tap`, `junit`, `log`, `none`; repeatable, e.g. `-o junit:out.xml -o none` |
+| `--setup <path>` | PHP script loaded at startup with `Tester\Runner\Runner $runner` in scope |
+| `--coverage <file>` + `--coverage-src <path>` | needs Xdebug or PCOV **and** `Environment::setup()` in the tests, else the report is empty |
 
 ### Test Output Directory
 

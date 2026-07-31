@@ -106,7 +106,43 @@ Features:
 - Instant updates without page reload
 - Auto-detected when dev server running + debug mode
 
-### Custom Dev Server
+### Plugin Options
+
+`@nette/vite-plugin` takes only these options; everything else is plain Vite config.
+
+| Option | Default | Notes |
+|---|---|---|
+| `entry` | none | Relative to `root` (`assets`). Globs (`entries/*.ts`) are expanded against `root` and need Node 22+. Named entries are unsupported. |
+| `refresh` | none | Globs that trigger a **full page reload**. Resolved against the project root (cwd), **not** `root`. Without it, editing a Latte or PHP file never reloads the browser. |
+| `appUrl` | none | URL of the PHP app. Only its hostname is used; CORS then allows that host over http/https on any port. Prefer this to hand-written `server.cors`. |
+| `host` | `server.host`, else `localhost` | Host used in the URL written for PHP, in CORS and in `allowedHosts`. |
+| `infoFile` | `.vite/nette.json` | Relative to `<root>/<build.outDir>`. See the trap below. |
+
+**Version caveat:** `refresh`, `appUrl`, `host: 'network'` and glob entries are committed but
+**not in the published npm release (1.0.2)** yet. On a project installed from npm, use the
+manual `server` config below instead.
+
+Vite options the plugin sets, all overridable: `root: 'assets'`, `base: ''`,
+`build.manifest: true`, `build.assetsDir: ''`, `build.outDir: <cwd>/www/assets` (throws if
+`www/` does not exist), `server.cors`, `server.allowedHosts`.
+
+`host` values: a domain like `'myapp.local'` is used in the dev-server URL, CORS and
+`allowedHosts`, so no manual CORS is needed. `'network'` binds to all interfaces and advertises
+the machine's first non-internal IPv4 address, for testing from a phone. `'0.0.0.0'`, `'::'`
+and `true` are **rewritten to `localhost`** in the URL handed to PHP, because a browser cannot
+use `0.0.0.0` — and they are therefore not added to `allowedHosts`, so behind a custom domain
+set `host` explicitly. A user-set `server.origin` wins over all of it and is passed through
+verbatim, which is what you want behind a reverse proxy.
+
+```js
+nette({
+	entry: 'app.js',
+	appUrl: 'https://myapp.local',            // instead of manual server.cors
+	refresh: ['app/**/*.latte', 'app/**/*.php'],
+}),
+```
+
+Manual equivalent for the published release:
 
 ```js
 export default defineConfig({
@@ -119,6 +155,35 @@ export default defineConfig({
 	},
 });
 ```
+
+### Dev-Server Info File — check this first when HMR is not detected
+
+While `vite` runs, the plugin writes `www/assets/.vite/nette.json` containing
+`{"devServer": "<url>", "pid": …, "timestamp": …}`; PHP reads only `devServer`. It is deleted on
+close, on SIGINT/SIGTERM/SIGBREAK/exit and at the start of `vite build`, so a crashed dev server
+cannot shadow a production build.
+
+HMR activates only when **both** hold: the file exists *and* the application is in debug mode.
+
+**Trap:** the PHP side hardcodes the lookup at `<mapper path>/.vite/nette.json`, so renaming it
+via `infoFile` silently disables auto-detection — you then have to set `devServer: '<url>'` in
+NEON by hand.
+
+### Docker Development
+
+```js
+nette({ entry: 'app.js', host: 'myapp.local' }),  // omit host for plain localhost
+// ...
+server: {
+	host: '0.0.0.0',              // required: listen on all interfaces inside the container
+	port: 5173,
+	strictPort: true,             // fail instead of silently picking another port
+	watch: { usePolling: true },  // mounted volumes often don't deliver inotify events
+},
+```
+
+Publish port 5173 from the container. `0.0.0.0` is rewritten to `localhost` in the URL given to
+PHP, so assets load; a custom domain needs the plugin's `host` option.
 
 ### HTTPS Development
 

@@ -213,7 +213,11 @@ $form->addHidden('id', $id);
 $form->addHidden('returnUrl', $this->getParameter('returnUrl'));
 ```
 
-Note: CSRF protection is automatic in Nette Forms — no need to add a hidden CSRF token manually.
+Note: CSRF protection is automatic in Nette Forms — no need to add a hidden token manually.
+Since nette/http 3.4 it is based on the `Sec-Fetch-*` headers rather than a token, so
+`addProtection()` is deprecated ("default protection is sufficient"). A legitimate
+cross-origin POST is allowed with `$form->allowCrossOrigin()`; there is no `setCrossOrigin()`.
+See the **nette-http** skill for the mechanism and its Safari fallback.
 
 ### addContainer(string $name): Container
 

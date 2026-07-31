@@ -21,7 +21,10 @@ For detailed references:
 
 ## DateTime
 
-Extended `DateTime` class with strict validation and DST fixes.
+Extended `DateTime` class with strict validation and DST fixes. There is also
+`Nette\Utils\DateTimeImmutable` (since 4.1.5) with the same API on top of
+`\DateTimeImmutable` — **prefer it for new code**, mutable date objects are a classic source of
+action-at-a-distance bugs.
 
 ```php
 use Nette\Utils\DateTime;
@@ -233,7 +236,44 @@ Html::el('input', ['type' => 'text', 'name' => 'email']);
 Html::el('div class="box"');  // from string
 ```
 
+**Escaping is explicit and it is the one thing to get right here.** `setText()` / `addText()`
+escape, `setHtml()` / `addHtml()` do not — reach for the `Html` variants only when the string
+is provably safe. `add()` escapes strings but inserts `Html` objects as they are.
+
+`class` and `style` behave as arrays, which is what makes conditional markup readable —
+a `null` item is skipped, so no `if` is needed around it:
+
+```php
+$el->class[] = 'active';
+$el->class[] = $isTop ? 'top' : null;   // null is ignored
+$el->style['color'] = 'green';
+$el->data('config', ['a' => 1]);        // array is JSON-encoded
+```
+
 ---
+
+## Process
+
+Running external processes (since 4.1.4) — use this instead of `exec()`, `shell_exec()` or
+pulling in `symfony/process`.
+
+```php
+use Nette\Utils\Process;
+
+// No shell involved, arguments are passed as an array -> nothing to escape
+$p = Process::runExecutable('git', ['log', '-1', '--format=%H']);
+$p->ensureSuccess();              // returns void, do not chain
+echo $p->getStdOutput();          // note the capital O
+
+// Shell string: convenient for pipes, NEVER build it from untrusted input
+$p = Process::runCommand('git log --oneline | head -n 20');
+```
+
+Both take `$env`, `$options`, `$stdin`, `$stdout`, `$stderr`, `$directory` and `$timeout`
+(default 60 s) — with that many parameters, pass them as named arguments
+(`timeout: 30`). Instance methods: `wait()`, `isRunning()`, `getExitCode()`, `isSuccess()`,
+`ensureSuccess()`, `getStdOutput()`, `getStdError()`, `terminate()`, `detach()`, `getPid()`.
+Reading output throws if it was redirected, discarded or piped instead of captured.
 
 ## Callback
 

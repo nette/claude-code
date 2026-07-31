@@ -79,8 +79,13 @@ assets:
 	mapping:
 		default:
 			type: vite
-			devServer: true    # Enable HMR in debug mode
+			path: assets       # REQUIRED in practice - must match Vite's build.outDir
 ```
+
+`path` is optional in the schema and nothing validates it, but when omitted it falls back to
+`%wwwDir%`, so the manifest is looked up in `www/.vite/manifest.json` instead of
+`www/assets/.vite/manifest.json` and you get `RuntimeException: Failed to read Vite manifest`.
+`devServer` defaults to `true`, so there is no need to write it.
 
 ### Data Flow from Backend to Frontend
 
@@ -223,25 +228,6 @@ When using Tailwind CSS, configure it to scan Latte templates for class names:
 /* assets/css/app.css */
 @import 'tailwindcss';
 @source '../app/**/*.latte';
-```
-
-### Essential Commands
-
-```bash
-# Start the development server with HMR
-npm run dev
-
-# Build assets for production
-npm run build
-
-# Build assets for development
-npm run build:dev
-
-# Run ESLint checks
-npm run lint
-
-# Run ESLint and fix issues
-npm run lint:fix
 ```
 
 ### Online Documentation

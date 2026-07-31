@@ -12,11 +12,19 @@ For the `#[Requires]` attribute (HTTP method/AJAX restrictions on actions), see 
 
 Understanding the request flow is essential for placing logic correctly:
 
-1. **`startup()`** – runs first, use for access checks and early redirects
-2. **`action<Name>()`** – processes the request (data writes, redirects). Signals (`handle<Name>()`) also run in this phase.
-3. **`beforeRender()`** – runs before every render, use for shared template variables
-4. **`render<Name>()`** – prepares data for the template (read-only, no redirects)
-5. **Template** – renders the HTML output
+1. **`checkRequirements()`** – evaluates the `#[Requires]` attribute
+2. **`startup()`** – use for access checks and early redirects. An override **must call
+   `parent::startup()`**, otherwise Nette throws `InvalidStateException`
+3. **`action<Name>()`** – processes the request (data writes, redirects)
+4. **canonicalization** – the redirect to the canonical URL happens here, i.e. *after* the action
+5. **`handle<Signal>()`** – signals run **after** the action phase and after canonicalization,
+   not inside the action phase
+6. **`beforeRender()`** – runs before every render, use for shared template variables
+7. **`render<Name>()`** – prepares data for the template (read-only, no redirects)
+8. **`afterRender()`** – after the render methods, before the template is sent
+9. **template is sent**, then **`shutdown()`**
+
+Each phase also has an event: `$onStartup`, `$onRender`, `$onShutdown`.
 
 The key insight: actions and signals *do things* (write, redirect), renders *prepare views* (read). Mixing these responsibilities leads to redirect-after-render bugs and untestable presenters.
 

@@ -13,6 +13,11 @@ composer require nette/forms
 
 ### Forms in Presenters
 
+**Use `Nette\Application\UI\Form`, not `Nette\Forms\Form`.** The former extends the latter and
+adds `SignalReceiver`, so it can pick up the submit signal and reach the presenter;
+`Nette\Forms\Form` is the standalone variant and will not receive submitted data as a
+presenter component.
+
 Forms are created in factory methods named `createComponent<Name>`:
 
 ```php
@@ -265,7 +270,7 @@ $form->addEmail('email')
 
 **With Bootstrap:**
 ```latte
-{form productForm class => 'form-horizontal'}
+{form productForm, class => 'form-horizontal'}
 <div class="mb-3">
 	{label name class => 'form-label' /}
 	{input name class => 'form-control'}
@@ -294,9 +299,10 @@ $form->onSubmit[] = function (Form $form): void {
 	// Logging, analytics
 };
 
-// Custom validation after rules pass
+// Cross-field validation. Runs even when rules FAILED, so read values with
+// getUntrustedValues() – getValues() here warns and returns unvalidated data.
 $form->onValidate[] = function (Form $form): void {
-	if ($this->isBlocked($form->getValues()->email)) {
+	if ($this->isBlocked($form->getUntrustedValues()->email)) {
 		$form->addError('This email is blocked.');
 	}
 };
