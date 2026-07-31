@@ -174,7 +174,7 @@ Inside `{foreach}`:
 |-----|-------------|
 | `n:href` | Link in `<a>` element |
 | `{link Presenter:action}` | Generate link |
-| `{plink Presenter:action}` | Persistent link |
+| `{plink Presenter:action}` | Link to a presenter. Needed in a component template, where `{link}`/`n:href` always mean a signal |
 | `{control name}` | Render component |
 | `{snippet name}...{/snippet}` | AJAX snippet |
 | `{snippetArea name}` | Snippet wrapper |

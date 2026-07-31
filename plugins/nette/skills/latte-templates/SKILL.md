@@ -84,58 +84,30 @@ Pair tags can be written as HTML attributes:
 <a href={$url} n:tag-if="$url">Link</a>
 ```
 
-### Conditions
+### Conditions and Loops
+
+`{if}` / `{elseif}` / `{else}`, `{foreach}` and `{for}` work as expected. What is Latte-specific:
 
 ```latte
-{if $stock > 0}
-	In stock
-{elseif $onWay}
-	On the way
-{else}
-	Not available
-{/if}
+{ifset $user}...{/ifset}          {* the variable exists, unlike {if isset()} *}
 
-{ifset $user}...{/ifset}          {* if variable exists *}
-
-{* switch/case *}
-{switch $type}
+{switch $type}                    {* no break, cases do not fall through *}
 	{case admin}Administrator
 	{case user}User
 	{default}Guest
 {/switch}
-```
 
-### Loops
-
-```latte
-{foreach $items as $item}
-	{$item->name}
-{/foreach}
-
-{foreach $items as $key => $item}
-	{$key}: {$item}
-{/foreach}
-
-{* With else for empty arrays *}
 {foreach $items as $item}
 	<li>{$item}</li>
-{else}
+{else}                            {* runs when the array is empty *}
 	<li>No items found</li>
 {/foreach}
 
-{* Iterator variable *}
 {foreach $items as $item}
-	{$iterator->counter}. {$item}  {* 1, 2, 3... *}
-	{if $iterator->first}First!{/if}
-	{if $iterator->last}Last!{/if}
-{/foreach}
-
-{* Helper tags *}
-{foreach $items as $item}
-	{first}<ul>{/first}
-	<li>{$item}</li>
+	{$iterator->counter}. {$item}   {* 1, 2, 3…; also ->first, ->last, ->odd, ->even *}
+	{first}<ul>{/first}             {* rendered only in the first iteration *}
 	{last}</ul>{/last}
-	{sep}, {/sep}                  {* separator between items *}
+	{sep}, {/sep}                   {* separator, skipped after the last item *}
 {/foreach}
 ```
 
@@ -220,36 +192,115 @@ Pair tags can be written as HTML attributes:
 | `{block name}...{/block}` | Define block |
 | `{layout 'file'}` | Extend layout |
 | `{do expression}` | Execute without output |
-| `{php expression}` | Execute PHP expression |
+| `{php expression}` | Obsolete alias for `{do}` – a single expression only. Real PHP code needs `RawPhpExtension` |
 | `{dump $var}` | Debug dump (Tracy) |
 
 See [the complete tag reference](references/tags.md) for all available tags.
 
-### Smart HTML Attributes
+### Smart HTML Attributes (Latte 3.1)
+
+Applies only when the **whole** attribute value is one `{...}` expression (`title={$t}` or
+`title="{$t}"`). In a mixed value (`title="foo {$t}"`) none of it applies – null becomes `''`,
+an array becomes `"Array"`. `n:attr` follows the same rules, so `{if}` / `n:attr` wrappers
+around attributes are obsolete.
+
+| Kind | Attributes | Value handling |
+|---|---|---|
+| bool | `allowfullscreen async autofocus autoplay checked controls default defer disabled formnovalidate inert ismap itemscope loop multiple muted nomodule novalidate open playsinline readonly required reversed selected` | truthy → bare name; falsey (`false`, `null`, `0`, `''`, `[]`) → omitted |
+| tristate | `contenteditable draggable spellcheck writingsuggestions` | `bool` → the keywords `"true"` / `"false"`; `null` omits the attribute |
+| valued bool | `hidden popover` | flag like a bool, but a non-empty value survives (`hidden="until-found"`); falsy is tested first, so `'0'` omits it rather than rendering an invalid value |
+| list | `accesskey class headers itemprop ping rel role sandbox` | array → space-separated |
+| style | `style` | array → `prop: value; …` |
+| data | `data-*` | array / `stdClass` → JSON; `bool` → `"true"` / `"false"` |
+| aria | `aria-*` | `bool` → `"true"` / `"false"`; array → space-separated |
+| plain | everything else | `string`/`int`/`float`/`Stringable` printed; `null` omits the attribute; array, `bool` or other object → `E_USER_WARNING` and the attribute is dropped |
+
+In list/aria arrays a plain item is used as-is, a keyed item yields the **key** only if its
+value is `=== true` (`active => 1` renders `1`, not `active`); items with `null`, `false`, `0`,
+`''` are skipped, an all-skipped array omits the attribute. In `style`, a keyed item is skipped
+by the same rule, so `opacity => 0` vanishes (`'0px'` survives).
 
 ```latte
-{* null removes attribute *}
-<div title={$title}>
+<input type="text" disabled={$disabled} readonly={$readonly}>
+{* false, true → <input type="text" readonly> *}
 
-{* boolean controls presence *}
-<input type="checkbox" checked={$isChecked}>
+<div title={$title}>x</div>          {* null → <div>x</div> *}
+<div title="Hi {$name}">x</div>      {* null → <div title="Hi ">x</div> (mixed value) *}
+<div title={$title|upper}>x</div>    {* null → <div title="">x</div> (filter stringifies null) *}
+<div title={$title?|upper}>x</div>   {* null → <div>x</div> (?| preserves the drop) *}
 
-{* arrays in class *}
-<div class={['btn', active => $isActive]}>
+<button class={[btn, btn-primary, active => $isActive, disabled => $isDisabled]}>x</button>
+{* true, false → <button class="btn btn-primary active">x</button> *}
 
-{* arrays JSON-encoded in data- *}
-<div data-config={[theme: dark, count: 5]}>
+<a rel={[nofollow, external => $isExternal]}>l</a>  {* true → <a rel="nofollow external">l</a> *}
+<span title={[a, b]}></span>  {* warning: array is not allowed for 'title'; attribute dropped *}
+<input value={$rows}>         {* array → same warning, no more value="Array" *}
+
+<div style={[background => lightblue, opacity => 0, display => $vis ? block : null]}></div>
+{* false → <div style="background: lightblue"></div> *}
+
+<div data-config={[theme: dark, version: 2]} data-open={=true}></div>
+{* → <div data-config='{"theme":"dark","version":2}' data-open="true"></div> *}
+
+<button aria-expanded={=false} aria-labelledby={[title, desc => $has]}></button>
+{* false → <button aria-expanded="false" aria-labelledby="title"></button> *}
+
+<div data-active={$on|toggle}></div>  {* toggle = bool handling for any attribute; false → <div></div> *}
+<div title={$cfg|json}></div>         {* json (must be the last filter) = JSON handling *}
 ```
 
-### n:class Helper
+A real filter defeats smart handling – it stringifies the value: `class={$arr|noescape}`
+renders `class="Array"`. Keep smart attributes filter-free; `toggle`, `json`, `nocheck` and
+`accept` are compile-time hints, not filters, and are safe.
+
+Traps:
+
+- **URL attributes are exempt** (`href`, `src`, `action`, `formaction`, `<object data>`): Latte
+  appends an internal `checkUrl` filter, so `href={$url}` with null renders `href=""`, and an
+  array gives `href="Array"` with only a PHP notice. Use `href={$url?|nocheck}` for the drop
+  (this also skips the URL safety check).
+- Tristate attributes distinguish **three** states: `true` and `false` render the keyword,
+  `null` drops the attribute. That matters, because "missing" and `="false"` mean different
+  things — `contenteditable="false"` disables editing inside an editable region, whereas a
+  missing attribute inherits from the parent.
+
+#### Prefer `class={[...]}` and smart attributes over `n:class` / `n:attr`
+
+Since 3.1 the attribute forms cover almost everything the `n:` ones did, so new templates
+should reach for them first. Neither `n:class` nor `n:attr` is deprecated in Latte, and there
+is one case only `n:attr` can express (below), so this is a preference, not a removal.
+
+**Do not rewrite existing templates mechanically** — two differences change the rendered
+output:
 
 ```latte
-{foreach $items as $item}
-	<a n:class="$item->active ? active, $iterator->first ? first, item">
-		{$item->name}
-	</a>
-{/foreach}
+<a n:class="$cnt ? open, item">      {* → *}  <a class={[$cnt ? open, item]}>  {* keep the ternary *}
+<a class={[open => $cnt]}>           {* wrong – $cnt = 3 renders class="3" *}
+<a class={[sel => $row]}>            {* wrong – a Stringable renders its string, a plain object throws *}
+<option n:attr="selected: $sel">     {* → *}  <option selected={$sel}>
 ```
+
+1. **A keyed item applies only when its value is `=== true`.** With any other truthy value the
+   *value* is printed instead of the key, which is silent. Keep the ternary rather than moving
+   the condition into a key.
+2. **`n:class` de-duplicates the list** (`array_unique`), `class={[...]}` does not — the same
+   class listed twice survives after the rewrite.
+
+`n:class` additionally rejects an array variable (`n:class="$arr"` → `class="Array"`; use
+`class={$arr}`) and a sibling `class="…"` on the same tag (CompileException); both fail loudly.
+
+The one case `n:attr` still owns is a **dynamic** set or name of attributes, which no static
+attribute can express:
+
+```latte
+<tr n:attr="$attrs">          {* ['data-id' => 5, 'class' => 'row'] → data-id="5" class="row" *}
+<a n:attr="[$name => $val]">  {* attribute name from a variable *}
+```
+
+**Migration from 3.0** – changed: `null` used to print `=""`; `data-`/`aria-` bools printed
+`"1"`/`""`; `data-` arrays printed a space-separated list; `on*` values were JSON-encoded.
+`$engine->setFeature(Latte\Feature::MigrationWarnings, true)` warns on every affected
+attribute; the `|accept` filter silences it per value.
 
 ---
 
@@ -352,7 +403,8 @@ class ProductTemplate extends Nette\Bridges\ApplicationLatte\Template
 {* Links *}
 <a n:href="Product:detail $id">Detail</a>
 <a href={link Product:detail $id}>Detail</a>
-<a href={plink //Product:detail $id}>Absolute</a>
+<a href={link //Product:detail $id}>Absolute (// makes it absolute)</a>
+<a href={plink Product:detail $id}>From a component template, link to a PRESENTER</a>
 
 {* Components *}
 {control productForm}
