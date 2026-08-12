@@ -30,9 +30,17 @@ Install globally using `/php-fixer:install-php-fixer`. After installation, PHP f
 - Use UPPERCASE for two-letter abbreviations (`IO`, `DB`), PascalCase/camelCase for longer ones (`Http`, `Xml`)
 - Use nouns or noun phrases for class names
 - Class names should include both specificity and generality (e.g., `ArrayIterator`)
+- Never let a method name be a bare noun - a method is an action: `getProvider()`, not `provider()`. A verb is the usual form; the exceptions are settled conventions, namely static factories (`fromFile()`), conversions (`toArray()`), interface methods (`jsonSerialize()`) and fluent interfaces whose names echo the domain rather than an action, as a query builder echoes SQL clauses
 - PascalCase for classes and class constants/enums
 - camelCase for methods and properties
 - Never use prefixes/suffixes like `Abstract`, `Interface`, or `I` - the type system already distinguishes them
+
+### Method Order
+- Place a new method deliberately - the order of methods is the outline a reader gets, saying which parts are primary and which are derived. The three rules below are in order of precedence: when they disagree, the earlier one wins
+- Keep a method with those covering the same subject, and never break up a group that belongs together, not even with a method on that same subject - it goes before the whole group or after it
+- Put the general before the special: a variant of an existing method goes right after it, never before, so the reader meets the plain form first and the special case second. A method serving one narrow use case follows the general ones rather than sitting among them
+- A helper goes after the method that needs it, after all of them when it serves several. Where exactly is settled by the two rules above and by what surrounds it: it may follow immediately, it may sit after the whole group, it may close the class. Visibility does not decide the order - a private helper is not moved to the end of the class for being private
+- Leave existing methods where they are - reordering them buries the real change in the diff
 
 ### Formatting
 - Use TABs for indentation everywhere (PHP, JS, HTML, CSS/SCSS, NEON, Latte, ...)
